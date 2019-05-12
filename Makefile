@@ -1,5 +1,6 @@
 REGION=eu-west-1
 NAME=bath-android-build
+CONTAINER_WORK_DIR=/workspace
 
 gituser := $(shell git config --global user.name)
 gitbranch := $(shell git branch | grep \* | cut -d ' ' -f2)
@@ -53,5 +54,5 @@ pipeline:
 		TEMPLATE_BODY=file://cloudformation/aws_codepipeline/code_template_cfn.yml \
 		PARAMETERS='ParameterKey=Project,ParameterValue=$(NAME) ParameterKey=GitHubUser,ParameterValue=$(gituser) ParameterKey=GitHubBranch,ParameterValue=$(gitbranch) ParameterKey=GitHubRepo,ParameterValue=$(gitrepo) ParameterKey=GitHubToken,ParameterValue=$(TOKEN)';
 
-
-
+buildenv:
+	echo "approve?"

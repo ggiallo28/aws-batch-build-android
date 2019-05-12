@@ -6,18 +6,26 @@ Description: "Launch template to avoid creating a custom ami"
 Parameters:
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup::Id
+
   Subnets:
     Type: List<AWS::EC2::Subnet::Id>
+
   KmsKeyArn:
     Type: String
     Default: arn:aws:kms:eu-west-1:438591499564:key/025471da-37d7-4127-aae7-02cf06f69cf4
+
+  ECRImage:
+    Type: String
+
+  GitTag:
+    Type: String
 
 Resources:
   SpecialComputeEnvironment:
     Type: "AWS::Batch::ComputeEnvironment"
     Properties:
       Type: MANAGED
-      ComputeEnvironmentName: !Sub "Special-ComputeEnvironment-${AWS::Region}-2"
+      ComputeEnvironmentName: !Sub "Special-ComputeEnvironment-${AWS::Region}-${GitTag}"
       ServiceRole: !Ref SpecialServiceRole
       ComputeResources:
         MaxvCpus: 256
@@ -26,7 +34,7 @@ Resources:
         Subnets: !Ref Subnets
         Type: EC2
         MinvCpus: 0
-        ImageId: ami-00921cd1ce43d567a # ami-0a6a36557ea3b9859
+        #ImageId: ami-00921cd1ce43d567a # ami-0a6a36557ea3b9859
         InstanceRole: !Ref SpecialInstanceProfile
         InstanceTypes:
           - t3.large
@@ -89,7 +97,7 @@ Resources:
         Privileged: false
         ReadonlyRootFilesystem: false
         Vcpus: 4
-        Image: 438591499564.dkr.ecr.eu-west-1.amazonaws.com/android-build:latest
+        Image: !Join [":",[!Ref ECRImage, !Ref GitTag]]
         MountPoints:
           - ContainerPath: "/workspace"
             ReadOnly: false
