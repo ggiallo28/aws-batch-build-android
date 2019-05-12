@@ -222,40 +222,47 @@ Resources:
               RunOrder: 1
         - Name: Deploy
           Actions:
-            - Name: Deploy
-              - ActionTypeId:
-                  Category: Deploy
-                  Owner: AWS
-                  Provider: CloudFormation
-                  Version: 1
-                Configuration:
-                  ActionMode: CHANGE_SET_REPLACE
-                  Capabilities: CAPABILITY_NAMED_IAM
-                  ChangeSetName: !Join ["-", [!Ref Project, "changeset"]]
-                  ParameterOverrides: !Sub "{\"SecurityGroup\":\"${SecurityGroup}\",\"Subnets\"\:\"${SubnetsList}\",\"KmsKeyArn\":\"${KmsKeyArn}\",\"ECRImage\":\"${ECRImage}\",\"GitTag\":\"${GitTag}\"}"
-                  StackName: !Ref Project
-                  TemplatePath: 'BuildArtifact::aws_batch/batch_template_cfn.yml'
-                InputArtifacts:
-                - Name: BuildArtifact'
-                Name: GenerateChangeSet
-                OutputArtifacts: [
-                  ]
-                RunOrder: 1
-              - ActionTypeId:
-                  Category: Deploy
-                  Owner: AWS
-                  Provider: CloudFormation
-                  Version: 1
-                Configuration:
-                  ActionMode: CHANGE_SET_EXECUTE
-                  ChangeSetName: pipeline-changeset
-                  StackName: !Sub 'awscodestar-${ProjectId}-infrastructure'
-                InputArtifacts: [
-                  ]
-                Name: ExecuteChangeSet
-                OutputArtifacts: [
-                  ]
-                RunOrder: 2
+            - Name: GenerateChangeSet
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: 1
+              Configuration:
+                ActionMode: CHANGE_SET_REPLACE
+                Capabilities: CAPABILITY_NAMED_IAM
+                ChangeSetName: !Join ["-", [!Ref Project, "changeset"]]
+                ParameterOverrides: !Sub |
+                  {
+                    "SecurityGroup":"${SecurityGroup}",
+                    "Subnets":"${SubnetsList}",
+                    "KmsKeyArn":"${KmsKeyArn}",
+                    "ECRImage":"${ECRImage}",
+                    "GitTag":"${GitTag}"
+                  }
+                StackName: !Ref Project
+                TemplatePath: 'BuildArtifact::aws_batch/batch_template_cfn.yml'
+              InputArtifacts:
+              - Name: BuildArtifact
+              OutputArtifacts: [
+                ]
+              RunOrder: 1
+            - Name: ExecuteChangeSet
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: 1
+              Configuration:
+                ActionMode: CHANGE_SET_EXECUTE
+                ChangeSetName: !Join ["-", [!Ref Project, "changeset"]]
+                StackName: !Ref Project
+              InputArtifacts: [
+                ]
+
+              OutputArtifacts: [
+                ]
+              RunOrder: 2
 Outputs:
   PipelineUrl:
     Value: !Sub https://console.aws.amazon.com/codepipeline/home?region=${AWS::Region}#/view/${Pipeline}
