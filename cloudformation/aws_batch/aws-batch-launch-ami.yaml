@@ -1,0 +1,230 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Metadata:
+  License: Apache-2.0
+Description: "Launch template to avoid creating a custom ami"
+
+Parameters:
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup::Id
+  Subnets:
+    Type: List<AWS::EC2::Subnet::Id>
+  KmsKeyArn:
+    Type: String
+    Default: arn:aws:kms:eu-west-1:438591499564:key/025471da-37d7-4127-aae7-02cf06f69cf4
+
+Resources:
+  SpecialComputeEnvironment:
+    Type: "AWS::Batch::ComputeEnvironment"
+    Properties:
+      Type: MANAGED
+      ComputeEnvironmentName: !Sub "Special-ComputeEnvironment-${AWS::Region}-2"
+      ServiceRole: !Ref SpecialServiceRole
+      ComputeResources:
+        MaxvCpus: 256
+        SecurityGroupIds:
+          - !Ref SecurityGroup
+        Subnets: !Ref Subnets
+        Type: EC2
+        MinvCpus: 0
+        ImageId: ami-00921cd1ce43d567a # ami-0a6a36557ea3b9859
+        InstanceRole: !Ref SpecialInstanceProfile
+        InstanceTypes:
+          - t3.large
+        LaunchTemplate:
+          LaunchTemplateId: !Ref SpecialComputeLaunchTemplate
+          Version: !GetAtt SpecialComputeLaunchTemplate.LatestVersionNumber
+        DesiredvCpus: 0
+      State: ENABLED
+
+  SpecialComputeLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: "Special-inc-volume-encrypt"
+      LaunchTemplateData:
+        KeyName: "eu-west-1"
+        BlockDeviceMappings:
+          - DeviceName:  '/dev/sdb'  # Amazon ECS-Optimized Amazon Linux 2 ami accepts EDS vol /dev/sd[b-l]
+            Ebs:
+              DeleteOnTermination: true
+              Encrypted: false
+              VolumeSize: 500
+              VolumeType: "sc1"
+        UserData:
+         "Fn::Base64": !Sub |
+            MIME-Version: 1.0
+            Content-Type: multipart/mixed; boundary="==MYBOUNDARY=="
+
+            --==MYBOUNDARY==
+            Content-Type: text/x-shellscript; charset="us-ascii"
+
+            #!/bin/bash
+            mkfs.ext4  /dev/sdb
+            (
+            echo n # Add a new partition
+            echo p # Primary partition
+            echo 1 # Partition number
+            echo   # First sector (Accept default: 1)
+            echo   # Last sector (Accept default: varies)
+            echo w # Write changes
+            ) | fdisk  /dev/sdb
+            mkfs.ext4  /dev/xvdb1
+            mkdir /data
+            echo " /dev/xvdb1       /data  ext4    defaults        0       2" >> /etc/fstab
+            mount -a
+            service docker restart
+
+            --==MYBOUNDARY==
+
+  SpecialJobDefinition:
+    Type: "AWS::Batch::JobDefinition"
+    Properties:
+      Type: container
+      Timeout:
+        AttemptDurationSeconds: 1800
+      JobDefinitionName: !Sub "Special-job-def-${AWS::Region}"
+      ContainerProperties:
+        Command :
+          - "/workspace/entrypoint.sh"
+        Memory: 6500
+        Privileged: false
+        ReadonlyRootFilesystem: false
+        Vcpus: 4
+        Image: 438591499564.dkr.ecr.eu-west-1.amazonaws.com/android-build:latest
+        MountPoints:
+          - ContainerPath: "/workspace"
+            ReadOnly: false
+            SourceVolume: data
+        Volumes:
+          - Name: data
+            Host:
+              SourcePath: "/data"
+
+  SpecialJobQueue:
+    Type: AWS::Batch::JobQueue
+    Properties:
+      ComputeEnvironmentOrder:
+        - Order: 1
+          ComputeEnvironment: !Ref  SpecialComputeEnvironment
+      State: ENABLED
+      Priority: 1
+      JobQueueName: !Sub Special-mounttest-${AWS::Region}
+
+  SpecialServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      RoleName: !Sub Special-batch-${AWS::Region}
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "batch.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: ecs-instance-options-3
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "ecs:CreateCluster"
+                  - "ecs:DeregisterContainerInstance"
+                  - "ecs:DiscoverPollEndpoint"
+                  - "ecs:Poll"
+                  - "ecs:RegisterContainerInstance"
+                  - "ecs:StartTelemetrySession"
+                  - "ecs:UpdateContainerInstancesState"
+                  - "ecs:Submit*"
+                  - "ecr:GetAuthorizationToken"
+                  - "ecr:BatchCheckLayerAvailability"
+                  - "ecr:GetDownloadUrlForLayer"
+                  - "ecr:BatchGetImage"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                  - "s3:Get*"
+                  - "s3:List*"
+                Resource: "*"
+        - PolicyName: "security"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "kms:Decrypt"
+                  - "kms:Encrypt"
+                  - "kms:GenerateDataKey"
+                  - "kms:ReEncrypt"
+                  - "kms:Describe"
+                Resource: !Ref KmsKeyArn
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole
+
+  SpecialInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      RoleName: !Sub Special-batch-instance-${AWS::Region}
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "ec2.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: "security"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "kms:Decrypt"
+                  - "kms:Encrypt"
+                  - "kms:GenerateDataKey"
+                  - "kms:ReEncrypt"
+                  - "kms:Describe"
+                Resource: !Ref KmsKeyArn
+        - PolicyName: ecs-instance-options
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "ecs:CreateCluster"
+                  - "ecs:DeregisterContainerInstance"
+                  - "ecs:DiscoverPollEndpoint"
+                  - "ecs:Poll"
+                  - "ecs:RegisterContainerInstance"
+                  - "ecs:StartTelemetrySession"
+                  - "ecs:UpdateContainerInstancesState"
+                  - "ecs:Submit*"
+                  - "ecr:GetAuthorizationToken"
+                  - "ecr:BatchCheckLayerAvailability"
+                  - "ecr:GetDownloadUrlForLayer"
+                  - "ecr:BatchGetImage"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                  - "s3:Get*"
+                  - "s3:List*"
+                Resource: "*"
+        - PolicyName: "s3-glue-data"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "s3:*"
+                Resource:
+                  - "*"
+
+  SpecialInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+        - !Ref SpecialInstanceRole
