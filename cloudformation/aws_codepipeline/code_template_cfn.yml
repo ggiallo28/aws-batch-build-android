@@ -18,13 +18,8 @@ Parameters:
   GitHubUser:
     Type: String
 
-  SecurityGroup:
+  VpcStackName:
     Type: String
-    Default: sg-bfdde5c2
-
-  SubnetsList:
-    Type: String
-    Default: subnet-2ceb6164,subnet-348c486e
 
   KmsKeyArn:
     Type: String
@@ -166,9 +161,9 @@ Resources:
             post_build:
               commands:
                 - docker push "$IMAGE_URI"
-                - printf '[{"name":"simple-app","imageUri":"%s"}]' "$IMAGE_URI" > images.json
+                - printf '[{"ImageName":"%s","ImageTag":"%s"}]' "$IMAGE_NAME" "$TAG" > parameters.json
           artifacts:
-            files: images.json
+            files: parameters.json
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/docker:17.09.0
@@ -178,6 +173,8 @@ Resources:
             Value: !Ref AWS::Region
           - Name: REPOSITORY_URI
             Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${Repository}
+          - Name: IMAGE_NAME
+            Value: !Ref Repository
       Name: !Ref AWS::StackName
       ServiceRole: !Ref CodeBuildServiceRole
 
@@ -232,16 +229,21 @@ Resources:
                 ActionMode: CHANGE_SET_REPLACE
                 Capabilities: CAPABILITY_NAMED_IAM
                 ChangeSetName: !Join ["-", [!Ref Project, "changeset"]]
-                ParameterOverrides: !Sub |
-                  {
-                    "SecurityGroup":"${SecurityGroup}",
-                    "Subnets":"${SubnetsList}",
-                    "KmsKeyArn":"${KmsKeyArn}",
-                    "ECRImage":"${ECRImage}",
-                    "GitTag":"${GitTag}"
-                  }
+                ParameterOverrides: !Sub
+                  - >
+                    {
+                      "Project":"${PROJECT}",
+                      "VpcStackName":"${VPCSTACKNAME}",
+                      "KmsKeyArn":"${KMSKEYARN}"
+                    }
+                  - {
+                      PROJECT: !Ref Project,
+                      VPCSTACKNAME: !Ref VpcStackName,
+                      KMSKEYARN: !Ref KmsKeyArn
+                    }
                 StackName: !Ref Project
-                TemplatePath: 'BuildArtifact::aws_batch/batch_template_cfn.yml'
+                TemplateConfiguration: 'BuildArtifact::aws_batch/batch_template_cfn.yml'
+                TemplatePath: 'BuildArtifact::parameters.json'
               InputArtifacts:
               - Name: BuildArtifact
               OutputArtifacts: [

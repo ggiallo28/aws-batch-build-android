@@ -1,6 +1,7 @@
 REGION=eu-west-1
-NAME=bath-android-build
+NAME=batch-android-build
 CONTAINER_WORK_DIR=/workspace
+KMS=arn:aws:kms:eu-west-1:438591499564:key/025471da-37d7-4127-aae7-02cf06f69cf4
 
 gituser := $(shell git config --global user.name)
 gitbranch := $(shell git branch | grep \* | cut -d ' ' -f2)
@@ -48,11 +49,20 @@ pipeline:
 	make .change \
 		STACK_NAME=$(NAME)-pipeline \
 		TEMPLATE_BODY=file://cloudformation/aws_codepipeline/code_template_cfn.yml \
-		PARAMETERS='ParameterKey=Project,ParameterValue=$(NAME) ParameterKey=GitHubUser,ParameterValue=$(gituser) ParameterKey=GitHubBranch,ParameterValue=$(gitbranch) ParameterKey=GitHubRepo,ParameterValue=$(gitrepo) ParameterKey=GitHubToken,ParameterValue=$(TOKEN)' || \
+		PARAMETERS='ParameterKey=VpcStackName,ParameterValue=$(NAME)-vpc ParameterKey=Project,ParameterValue=$(NAME) ParameterKey=GitHubUser,ParameterValue=$(gituser) ParameterKey=GitHubBranch,ParameterValue=$(gitbranch) ParameterKey=GitHubRepo,ParameterValue=$(gitrepo) ParameterKey=GitHubToken,ParameterValue=$(TOKEN)' || \
 	make .create \
 		STACK_NAME=$(NAME)-pipeline \
 		TEMPLATE_BODY=file://cloudformation/aws_codepipeline/code_template_cfn.yml \
-		PARAMETERS='ParameterKey=Project,ParameterValue=$(NAME) ParameterKey=GitHubUser,ParameterValue=$(gituser) ParameterKey=GitHubBranch,ParameterValue=$(gitbranch) ParameterKey=GitHubRepo,ParameterValue=$(gitrepo) ParameterKey=GitHubToken,ParameterValue=$(TOKEN)';
+		PARAMETERS='ParameterKey=VpcStackName,ParameterValue=$(NAME)-vpc ParameterKey=Project,ParameterValue=$(NAME) ParameterKey=GitHubUser,ParameterValue=$(gituser) ParameterKey=GitHubBranch,ParameterValue=$(gitbranch) ParameterKey=GitHubRepo,ParameterValue=$(gitrepo) ParameterKey=GitHubToken,ParameterValue=$(TOKEN)';
 
 buildenv:
-	echo "approve?"
+	aws cloudformation describe-stacks --stack-name $(NAME) --region $(REGION) && \
+	make .change \
+		STACK_NAME=$(NAME) \
+		TEMPLATE_BODY=file://cloudformation/aws_batch/batch_template_cfn.yml \
+		PARAMETERS='ParameterKey=Project,ParameterValue=$(NAME) ParameterKey=VpcStackName,ParameterValue=$(NAME)-vpc ParameterKey=KmsKeyArn,ParameterValue=$(KMS) ParameterKey=ImageName,ParameterValue=$(IMAGENAME) ParameterKey=ImageTag,ParameterValue=$(IMAGETAG)' || \
+	make .create \
+		STACK_NAME=$(NAME) \
+		TEMPLATE_BODY=file://cloudformation/aws_batch/batch_template_cfn.yml \
+		PARAMETERS='ParameterKey=Project,ParameterValue=$(NAME) ParameterKey=VpcStackName,ParameterValue=$(NAME)-vpc ParameterKey=KmsKeyArn,ParameterValue=$(KMS) ParameterKey=ImageName,ParameterValue=$(IMAGENAME) ParameterKey=ImageTag,ParameterValue=$(IMAGETAG)';
+

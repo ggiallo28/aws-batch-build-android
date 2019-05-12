@@ -4,52 +4,54 @@ Metadata:
 Description: "Launch template to avoid creating a custom ami"
 
 Parameters:
-  SecurityGroup:
-    Type: AWS::EC2::SecurityGroup::Id
+  Project:
+    Type: String
 
-  Subnets:
-    Type: List<AWS::EC2::Subnet::Id>
+  VpcStackName:
+    Type: String
 
   KmsKeyArn:
     Type: String
     Default: arn:aws:kms:eu-west-1:438591499564:key/025471da-37d7-4127-aae7-02cf06f69cf4
 
-  ECRImage:
+  ImageName:
     Type: String
 
-  GitTag:
+  ImageTag:
     Type: String
 
 Resources:
-  SpecialComputeEnvironment:
+  ComputeEnvironment:
     Type: "AWS::Batch::ComputeEnvironment"
     Properties:
       Type: MANAGED
-      ComputeEnvironmentName: !Sub "Special-ComputeEnvironment-${AWS::Region}-${GitTag}"
-      ServiceRole: !Ref SpecialServiceRole
+      ComputeEnvironmentName: !Sub "${Project}-${AWS::Region}-${ImageTag}"
+      ServiceRole: !Ref ServiceRole
       ComputeResources:
         MaxvCpus: 256
         SecurityGroupIds:
-          - !Ref SecurityGroup
-        Subnets: !Ref Subnets
+          - Fn::ImportValue: !Sub "${VpcStackName}:SecurityGroup"
+        Subnets:
+          - Fn::ImportValue: !Sub "${VpcStackName}:SubnetA"
+          - Fn::ImportValue: !Sub "${VpcStackName}:SubnetB"
         Type: EC2
         MinvCpus: 0
         #ImageId: ami-00921cd1ce43d567a # ami-0a6a36557ea3b9859
-        InstanceRole: !Ref SpecialInstanceProfile
+        InstanceRole: !Ref InstanceProfile
         InstanceTypes:
-          - t3.large
+          - c5.large
         LaunchTemplate:
-          LaunchTemplateId: !Ref SpecialComputeLaunchTemplate
-          Version: !GetAtt SpecialComputeLaunchTemplate.LatestVersionNumber
+          LaunchTemplateId: !Ref ComputeLaunchTemplate
+          Version: !GetAtt ComputeLaunchTemplate.LatestVersionNumber
         DesiredvCpus: 0
       State: ENABLED
 
-  SpecialComputeLaunchTemplate:
+  ComputeLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
-      LaunchTemplateName: "Special-inc-volume-encrypt"
+      LaunchTemplateName: !Join ["-",[!Ref Project, "launch-template"]]
       LaunchTemplateData:
-        KeyName: "eu-west-1"
+        #KeyName: "eu-west-1"
         BlockDeviceMappings:
           - DeviceName:  '/dev/sdb'  # Amazon ECS-Optimized Amazon Linux 2 ami accepts EDS vol /dev/sd[b-l]
             Ebs:
@@ -83,21 +85,21 @@ Resources:
 
             --==MYBOUNDARY==
 
-  SpecialJobDefinition:
+  JobDefinition:
     Type: "AWS::Batch::JobDefinition"
     Properties:
       Type: container
       Timeout:
         AttemptDurationSeconds: 1800
-      JobDefinitionName: !Sub "Special-job-def-${AWS::Region}"
+      JobDefinitionName: !Join ["-",[!Ref Project, "job-definition"]]
       ContainerProperties:
         Command :
-          - "/workspace/entrypoint.sh"
-        Memory: 6500
+          - "./../entrypoint.sh"
+        Memory: 3500
         Privileged: false
         ReadonlyRootFilesystem: false
-        Vcpus: 4
-        Image: !Join [":",[!Ref ECRImage, !Ref GitTag]]
+        Vcpus: 2
+        Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ImageName}:${ImageTag}"
         MountPoints:
           - ContainerPath: "/workspace"
             ReadOnly: false
@@ -107,21 +109,21 @@ Resources:
             Host:
               SourcePath: "/data"
 
-  SpecialJobQueue:
+  JobQueue:
     Type: AWS::Batch::JobQueue
     Properties:
       ComputeEnvironmentOrder:
         - Order: 1
-          ComputeEnvironment: !Ref  SpecialComputeEnvironment
+          ComputeEnvironment: !Ref  ComputeEnvironment
       State: ENABLED
       Priority: 1
-      JobQueueName: !Sub Special-mounttest-${AWS::Region}
+      JobQueueName: !Join ["-",[!Ref Project, "job-queue"]]
 
-  SpecialServiceRole:
+  ServiceRole:
     Type: AWS::IAM::Role
     Properties:
       Path: /
-      RoleName: !Sub Special-batch-${AWS::Region}
+      RoleName: !Join ["-",[!Ref Project, "service-role"]]
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -170,11 +172,11 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole
 
-  SpecialInstanceRole:
+  InstanceRole:
     Type: AWS::IAM::Role
     Properties:
       Path: /
-      RoleName: !Sub Special-batch-instance-${AWS::Region}
+      RoleName: !Join ["-",[!Ref Project, "instance-role"]]
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -230,9 +232,9 @@ Resources:
                 Resource:
                   - "*"
 
-  SpecialInstanceProfile:
+  InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Path: /
       Roles:
-        - !Ref SpecialInstanceRole
+        - !Ref InstanceRole

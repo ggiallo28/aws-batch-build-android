@@ -124,6 +124,12 @@ Outputs:
     Export:
       Name: !Join [ ":", [ !Ref "AWS::StackName", SubnetB ] ]
 
+  SubnetList:
+    Description: SubnetB
+    Value: !Join [",",[!Ref SubnetA, !Ref SubnetB]]
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", SubnetList ] ]
+
   StackName:
     Description: StackName
     Value: !Ref AWS::StackName
