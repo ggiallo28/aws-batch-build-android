@@ -82,6 +82,11 @@ Resources:
             mount -a
             service docker restart
 
+            yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+            status amazon-ssm-agent
+            start amazon-ssm-agent
+            status amazon-ssm-agent
+
             --==MYBOUNDARY==
 
   JobDefinition:
@@ -185,6 +190,8 @@ Resources:
                 - "ec2.amazonaws.com"
             Action:
               - "sts:AssumeRole"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
       Policies:
         - PolicyName: "security"
           PolicyDocument:
