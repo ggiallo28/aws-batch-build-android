@@ -66,3 +66,6 @@ buildenv:
 		TEMPLATE_BODY=file://cloudformation/aws_batch/batch_template_cfn.yml \
 		PARAMETERS='ParameterKey=Project,ParameterValue=$(NAME) ParameterKey=VpcStackName,ParameterValue=$(NAME)-vpc ParameterKey=KmsKeyArn,ParameterValue=$(KMS) ParameterKey=ImageName,ParameterValue=$(NAME)-ecr ParameterKey=ImageTag,ParameterValue=$(IMAGETAG)';
 
+endpoint:
+	cd cloudformation/aws_endpoint && sls deploy && cd ../..
+
