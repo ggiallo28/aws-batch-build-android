@@ -53,9 +53,65 @@ Resources:
                       "action": {
                           "type": "expire"
                       }
+                  },
+                  {
+                      "rulePriority": 2,
+                      "description": "Keep only ten images, expire all others",
+                      "selection": {
+                          "tagStatus": "any",
+                          "countType": "imageCountMoreThan",
+                          "countNumber": 10
+                      },
+                      "action": {
+                          "type": "expire"
+                      }
                   }
               ]
           }
+
+  CloudFormationTrustPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Join ["-",[!Ref Project, "cfn-policy"]]
+      PolicyDocument:
+        Statement:
+        - Action:
+          - cloudformation:CreateStack
+          - cloudformation:DeleteStack
+          - cloudformation:GetTemplate
+          - cloudformation:List*
+          - cloudformation:UpdateStack
+          - cloudformation:Describe*
+          - cloudformation:CreateChangeSet
+          - cloudformation:ExecuteChangeSet
+          Effect: Allow
+          Resource: "*"
+            #- !Sub 'arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/${Project}*'
+      Roles:
+        - !Ref CloudFormationTrustRole
+        - !Ref CodeBuildServiceRole
+        - !Ref CodePipelineServiceRole
+
+
+  CloudFormationTrustRole:
+    Type: AWS::IAM::Role
+    Description: Creating service role in IAM for AWS CloudFormation
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - cloudformation.amazonaws.com
+      Path: /
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSBatchFullAccess
+        - arn:aws:iam::aws:policy/AmazonEC2FullAccess
+        - arn:aws:iam::aws:policy/IAMFullAccess
+
+
 
   CodeBuildServiceRole:
     Type: AWS::IAM::Role
@@ -161,9 +217,11 @@ Resources:
             post_build:
               commands:
                 - docker push "$IMAGE_URI"
-                - printf '[{"ImageName":"%s","ImageTag":"%s"}]' "$IMAGE_NAME" "$TAG" > parameters.json
+                - printf '{"Parameters" :{"ImageTag":"%s"}}' "$TAG" > parameters.json
           artifacts:
-            files: parameters.json
+            files:
+              - parameters.json
+              - cloudformation/aws_batch/batch_template_cfn.yml
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/docker:17.09.0
@@ -173,8 +231,6 @@ Resources:
             Value: !Ref AWS::Region
           - Name: REPOSITORY_URI
             Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${Repository}
-          - Name: IMAGE_NAME
-            Value: !Ref Repository
       Name: !Ref AWS::StackName
       ServiceRole: !Ref CodeBuildServiceRole
 
@@ -234,16 +290,19 @@ Resources:
                     {
                       "Project":"${PROJECT}",
                       "VpcStackName":"${VPCSTACKNAME}",
-                      "KmsKeyArn":"${KMSKEYARN}"
+                      "KmsKeyArn":"${KMSKEYARN}",
+                      "ImageName":"${IMAGENAME}"
                     }
                   - {
                       PROJECT: !Ref Project,
                       VPCSTACKNAME: !Ref VpcStackName,
-                      KMSKEYARN: !Ref KmsKeyArn
+                      KMSKEYARN: !Ref KmsKeyArn,
+                      IMAGENAME: !Ref Repository
                     }
+                RoleArn: !GetAtt 'CloudFormationTrustRole.Arn'
                 StackName: !Ref Project
-                TemplateConfiguration: 'BuildArtifact::aws_batch/batch_template_cfn.yml'
-                TemplatePath: 'BuildArtifact::parameters.json'
+                TemplateConfiguration: 'BuildArtifact::parameters.json'
+                TemplatePath: 'BuildArtifact::cloudformation/aws_batch/batch_template_cfn.yml'
               InputArtifacts:
               - Name: BuildArtifact
               OutputArtifacts: [

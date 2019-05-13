@@ -12,7 +12,6 @@ Parameters:
 
   KmsKeyArn:
     Type: String
-    Default: arn:aws:kms:eu-west-1:438591499564:key/025471da-37d7-4127-aae7-02cf06f69cf4
 
   ImageName:
     Type: String
@@ -28,7 +27,6 @@ Resources:
       ComputeEnvironmentName: !Sub "${Project}-${AWS::Region}-${ImageTag}"
       ServiceRole: !Ref ServiceRole
       ComputeResources:
-        MaxvCpus: 256
         SecurityGroupIds:
           - Fn::ImportValue: !Sub "${VpcStackName}:SecurityGroup"
         Subnets:
@@ -36,6 +34,7 @@ Resources:
           - Fn::ImportValue: !Sub "${VpcStackName}:SubnetB"
         Type: EC2
         MinvCpus: 0
+        MaxvCpus: 4
         #ImageId: ami-00921cd1ce43d567a # ami-0a6a36557ea3b9859
         InstanceRole: !Ref InstanceProfile
         InstanceTypes:
