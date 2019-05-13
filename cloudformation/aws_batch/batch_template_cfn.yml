@@ -67,19 +67,24 @@ Resources:
             Content-Type: text/x-shellscript; charset="us-ascii"
 
             #!/bin/bash
-            mkfs.ext4  /dev/sdb
-            (
-            echo n # Add a new partition
-            echo p # Primary partition
-            echo 1 # Partition number
-            echo   # First sector (Accept default: 1)
-            echo   # Last sector (Accept default: varies)
-            echo w # Write changes
-            ) | fdisk  /dev/sdb
-            mkfs.ext4  /dev/xvdb1
+
+            mkfs -t xfs -f /dev/sdb
             mkdir /data
-            echo " /dev/xvdb1       /data  ext4    defaults        0       2" >> /etc/fstab
-            mount -a
+            mount /dev/sdb /data
+
+            #mkfs.ext4  /dev/sdb
+            #(
+            #echo n # Add a new partition
+            #echo p # Primary partition
+            #echo 1 # Partition number
+            #echo   # First sector (Accept default: 1)
+            #echo   # Last sector (Accept default: varies)
+            #echo w # Write changes
+            #) | fdisk  /dev/sdb
+            #mkfs.ext4  /dev/xvdb1
+            #mkdir /data
+            #echo " /dev/xvdb1       /data  ext4    defaults        0       2" >> /etc/fstab
+            #mount -a
             service docker restart
 
             yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
