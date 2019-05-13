@@ -31,6 +31,7 @@ ENV PREBUILT_CACHE_DIR=~/.ccache
 RUN ccache -M 100G
 
 COPY entrypoint.sh entrypoint.sh
+RUN chmod +x entrypoint.sh
 WORKDIR ./workspace
 ENTRYPOINT ["./../entrypoint.sh"]
 

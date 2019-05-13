@@ -50,7 +50,7 @@ Resources:
     Properties:
       LaunchTemplateName: !Join ["-",[!Ref Project, "launch-template"]]
       LaunchTemplateData:
-        #KeyName: "eu-west-1"
+        KeyName: "eu-west-1"
         BlockDeviceMappings:
           - DeviceName:  '/dev/sdb'  # Amazon ECS-Optimized Amazon Linux 2 ami accepts EDS vol /dev/sd[b-l]
             Ebs:
