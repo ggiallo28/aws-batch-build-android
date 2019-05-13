@@ -21,7 +21,8 @@ yes | repo sync -c -f --force-sync --no-tag --no-clone-bundle -j$(nproc --all) -
 # Go to the root of the source tree...
 # ...and run the build commands.
 . build/envsetup.sh
-lunch revengeos_hlte-user
-make -jx bacon
+lunch revengeos_potter-user
+lunch revengeos_potter-user
+make bacon -jx
 
 # scp -r rom.zip chityanj@storage.osdn.net:/storage/groups/r/re/revengeos/rolex
