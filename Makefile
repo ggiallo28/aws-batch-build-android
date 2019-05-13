@@ -60,9 +60,9 @@ buildenv:
 	make .change \
 		STACK_NAME=$(NAME) \
 		TEMPLATE_BODY=file://cloudformation/aws_batch/batch_template_cfn.yml \
-		PARAMETERS='ParameterKey=Project,ParameterValue=$(NAME) ParameterKey=VpcStackName,ParameterValue=$(NAME)-vpc ParameterKey=KmsKeyArn,ParameterValue=$(KMS) ParameterKey=ImageName,ParameterValue=$(IMAGENAME) ParameterKey=ImageTag,ParameterValue=$(IMAGETAG)' || \
+		PARAMETERS='ParameterKey=Project,ParameterValue=$(NAME) ParameterKey=VpcStackName,ParameterValue=$(NAME)-vpc ParameterKey=KmsKeyArn,ParameterValue=$(KMS) ParameterKey=ImageName,ParameterValue=$(NAME)-ecr ParameterKey=ImageTag,ParameterValue=$(IMAGETAG)' || \
 	make .create \
 		STACK_NAME=$(NAME) \
 		TEMPLATE_BODY=file://cloudformation/aws_batch/batch_template_cfn.yml \
-		PARAMETERS='ParameterKey=Project,ParameterValue=$(NAME) ParameterKey=VpcStackName,ParameterValue=$(NAME)-vpc ParameterKey=KmsKeyArn,ParameterValue=$(KMS) ParameterKey=ImageName,ParameterValue=$(IMAGENAME) ParameterKey=ImageTag,ParameterValue=$(IMAGETAG)';
+		PARAMETERS='ParameterKey=Project,ParameterValue=$(NAME) ParameterKey=VpcStackName,ParameterValue=$(NAME)-vpc ParameterKey=KmsKeyArn,ParameterValue=$(KMS) ParameterKey=ImageName,ParameterValue=$(NAME)-ecr ParameterKey=ImageTag,ParameterValue=$(IMAGETAG)';
 
