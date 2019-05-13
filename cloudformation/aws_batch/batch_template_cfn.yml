@@ -48,7 +48,7 @@ Resources:
   ComputeLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
-      LaunchTemplateName: !Join ["-",[!Ref Project, "launch-template"]]
+      LaunchTemplateName: !Join ["-",[!Ref Project, "launch-template", !Ref ImageTag]]
       LaunchTemplateData:
         #KeyName: "eu-west-1"
         BlockDeviceMappings:
