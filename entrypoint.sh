@@ -34,6 +34,6 @@ if [ DEVICE = "potter" ]
     lunch revengeos_$DEVICE-$MODE
 fi
 
-make -jx bacon
+make -j2 bacon
 
 # scp -r rom.zip chityanj@storage.osdn.net:/storage/groups/r/re/revengeos/rolex
