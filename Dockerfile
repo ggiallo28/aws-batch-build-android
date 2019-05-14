@@ -12,7 +12,8 @@ RUN apt-get update && \
     libsdl1.2-dev libssl-dev libtool lzma* lzop maven \
     ncftp ncurses-dev patch patchelf pkg-config pngcrush pngquant python \
     python-all-dev re2c schedtool squashfs-tools subversion texinfo w3m \
-    --no-install-recommends && rm -rf /var/lib/apt/lists/*
+    --no-install-recommends python3-pip && rm -rf /var/lib/apt/lists/*
+RUN pip3 install --upgrade awscli
 
 COPY setup setup
 RUN bash ./setup/setup.sh
