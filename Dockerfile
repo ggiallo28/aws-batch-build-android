@@ -9,7 +9,7 @@ RUN apt-get update && \
     adb autoconf automake axel bc clang cmake expat fastboot gcc gcc-multilib \
     htop imagemagick lib32z1-dev libtinfo5 libcap-dev libexpat1-dev \
     libgmp-dev liblz4-* liblzma* libmpc-dev libmpfr-dev libncurses5-dev \
-    libsdl1.2-dev libssl-dev libtool lzma* lzop maven \
+    libsdl1.2-dev libssl-dev libtool lzma* lzop maven python3-setuptools \
     ncftp ncurses-dev patch patchelf pkg-config pngcrush pngquant python \
     python-all-dev re2c schedtool squashfs-tools subversion texinfo w3m \
     --no-install-recommends python3-pip && rm -rf /var/lib/apt/lists/*

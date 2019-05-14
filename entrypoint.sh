@@ -3,7 +3,7 @@
 adb kill-server
 killall adb
 git config --global user.name "AWS"
-git config --global user.email "gianluigi@mucciolo.it"
+git config --global user.email "jeff@bezos.money"
 
 # Script to setup an android build environment on Arch Linux and derivative distributions
 aws s3 cp s3://batch-android-build-ggiallo28/.repo/repo.tar.gz ./repo.tar.gz | echo "true"
