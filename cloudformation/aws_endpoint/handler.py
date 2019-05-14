@@ -3,6 +3,7 @@ import os
 import boto3
 batch = boto3.client('batch')
 
+BUCKET=os.environ['BUCKET']
 JOB_QUEUE = os.environ['JOB_QUEUE']
 JOB_DEFINITION = os.environ['JOB_DEFINITION']
 
@@ -67,7 +68,7 @@ def hello(event, context):
             jobDefinition=JOB_DEFINITION,
             containerOverrides={
                 'command': [
-                    './../entrypoint.sh '+device_code_name+' '+mode,
+                    './../entrypoint.sh '+device_code_name+' '+mode+' '+BUCKET,
                 ]
             },
             timeout={
@@ -87,7 +88,7 @@ def hello(event, context):
         "statusCode": 200,
         "body": json.dumps({
             "message": "Your build will be available soon!",
-            "input": "{}/{}/job={}/rom.zip".format(os.environ['URL_PREFIX'],device_code_name,jobId)
+            "input": "{}/{}/{}/job={}/rom.zip".format(BUCKET,os.environ['URL_PREFIX'],device_code_name,jobId)
         })
     }
 

@@ -60,7 +60,8 @@ provider:
   environment:
     JOB_QUEUE: 'batch-android-build-job-queue'
     JOB_DEFINITION: 'batch-android-build-job-definition'
-    URL_PREFIX: 'https://s3-eu-west-1.amazonaws.com/batch-android-build-ggiallo28'
+    BUCKET: 'batch-android-build-ggiallo28'
+    URL_PREFIX: 'https://s3-eu-west-1.amazonaws.com/'
     MODE: '{"userdebug": "userdebug", "user": "user"}'
     DEVICES: '{"potter": "potter"}'
 

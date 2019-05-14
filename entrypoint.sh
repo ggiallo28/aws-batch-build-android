@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
+
 DEVICE=$2
 MODE=$1
+BUCKET=$3
 
 adb kill-server
 killall adb
@@ -13,7 +15,7 @@ aws s3 cp s3://batch-android-build-ggiallo28/.repo/repo.tar.gz ./repo.tar.gz | e
 tar -zxvf repo.tar.gz | echo "true"
 # Install Repo in the created directory
 # Use a real name/email combination, if you intend to submit patches
-yes | repo init -u https://github.com/RevengeOS/android_manifest -b r9.0-caf
+yes | repo init --depth 1 -u https://github.com/RevengeOS/android_manifest -b r9.0-caf
 tar -zcvf repo.tar.gz .repo
 aws s3 cp ./repo.tar.gz s3://batch-android-build-ggiallo28/.repo/repo.tar.gz | echo "true"
 
@@ -34,6 +36,10 @@ if [ DEVICE = "potter" ]
     lunch revengeos_$DEVICE-$MODE
 fi
 
-make -j2 bacon
+make -j$(nproc --all) bacon
+
+tar -zcvf rom.tar.gz $OUT_DIR
+aws s3 cp ./rom.tar.gz s3://$BUCKET/$DEVICE/job=$AWS_BATCH_JOB_ID/rom.tar.gz | echo "true"
+
 
 # scp -r rom.zip chityanj@storage.osdn.net:/storage/groups/r/re/revengeos/rolex
