@@ -88,7 +88,7 @@ def hello(event, context):
         "statusCode": 200,
         "body": json.dumps({
             "message": "Your build will be available soon!",
-            "input": "{}/{}/{}/job={}/rom.zip".format(BUCKET,os.environ['URL_PREFIX'],device_code_name,jobId)
+            "input": "{}/{}/{}/job={}/rom.tar.gz".format(BUCKET,os.environ['URL_PREFIX'],device_code_name,jobId)
         })
     }
 

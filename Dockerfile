@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM arm64v8/ubuntu
 
 # Grab Java 8 and build tools:
 RUN apt-get update && \
