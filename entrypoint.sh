@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+DEVICE=$2
+MODE=$1
+
 adb kill-server
 killall adb
 git config --global user.name "AWS"
@@ -24,8 +27,13 @@ aws s3 cp ./repo.tar.gz s3://batch-android-build-ggiallo28/.repo/repo.tar.gz | e
 # Go to the root of the source tree...
 # ...and run the build commands.
 . build/envsetup.sh
-lunch revengeos_potter-user
-lunch revengeos_potter-user
+
+if [ DEVICE = "potter" ]
+  then
+    lunch revengeos_$DEVICE-$MODE
+    lunch revengeos_$DEVICE-$MODE
+fi
+
 make -jx bacon
 
 # scp -r rom.zip chityanj@storage.osdn.net:/storage/groups/r/re/revengeos/rolex
