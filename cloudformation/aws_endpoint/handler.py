@@ -1,15 +1,13 @@
 import json
+import os
 import boto3
 batch = boto3.client('batch')
-URL_PREFIX = 'https://example.com/{}/{}/rom.zip'
 
-JOB_QUEUE = 'batch-android-build-job-queue'
-JOB_DEFINITION = 'batch-android-build-job-definition'
+JOB_QUEUE = os.environ['JOB_QUEUE']
+JOB_DEFINITION = os.environ['JOB_DEFINITION']
 
-is_device = {
-    "potter" : "potter"
-}
-
+is_device = json.loads(os.environ['DEVICES'])
+is_mode = json.loads(os.environ['MODE'])
 is_boolean = {
     "true" : True,
     "false" : False,
@@ -17,10 +15,6 @@ is_boolean = {
     "False" : False
 }
 
-is_mode = {
-    "userdebug" : "userdebug",
-    "user" : "user"
-}
 
 def hello(event, context):
     try:
@@ -93,9 +87,9 @@ def hello(event, context):
         "statusCode": 200,
         "body": json.dumps({
             "message": "Your build will be available soon!",
-            "input": URL_PREFIX.format(device_code_name,jobId)
-            })
-        }
+            "input": "{}/{}/job={}/rom.zip".format(os.environ['URL_PREFIX'],device_code_name,jobId)
+        })
+    }
 
     # Use this code if you don't use the http event with the LAMBDA-PROXY
     # integration

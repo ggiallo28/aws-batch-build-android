@@ -23,6 +23,6 @@ yes | repo sync -c -f --force-sync --no-tag --no-clone-bundle -j$(nproc --all) -
 . build/envsetup.sh
 lunch revengeos_potter-user
 lunch revengeos_potter-user
-make bacon -jx
+make -jx bacon
 
 # scp -r rom.zip chityanj@storage.osdn.net:/storage/groups/r/re/revengeos/rolex

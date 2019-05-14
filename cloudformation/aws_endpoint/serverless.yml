@@ -57,8 +57,12 @@ provider:
 #            - "/*"
 
 # you can define service wide environment variables here
-#  environment:
-#    variable1: value1
+  environment:
+    JOB_QUEUE: 'batch-android-build-job-queue'
+    JOB_DEFINITION: 'batch-android-build-job-definition'
+    URL_PREFIX: 'https://s3-eu-west-1.amazonaws.com/batch-android-build-ggiallo28'
+    MODE: '{"userdebug": "userdebug", "user": "user"}'
+    DEVICES: '{"potter": "potter"}'
 
 # you can add packaging information here
 #package:
