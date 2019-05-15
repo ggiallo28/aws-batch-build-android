@@ -9,22 +9,19 @@ adb kill-server
 killall adb
 git config --global user.name "AWS"
 git config --global user.email "jeff@bezos.money"
+git config --global url.https://source.codeaurora.org.insteadOf git://codeaurora.org
 
 # Script to setup an android build environment on Arch Linux and derivative distributions
-aws s3 cp s3://batch-android-build-ggiallo28/.repo/repo.tar.gz ./repo.tar.gz | echo "true"
-tar -zxvf repo.tar.gz | echo "true"
 # Install Repo in the created directory
 # Use a real name/email combination, if you intend to submit patches
 yes | repo init --depth 1 -u https://github.com/RevengeOS/android_manifest -b r9.0-caf
-tar -zcvf repo.tar.gz .repo
-aws s3 cp ./repo.tar.gz s3://batch-android-build-ggiallo28/.repo/repo.tar.gz | echo "true"
 
 # Let Repo take care of all the hard work
 #
 # Tthe x on jx it's the amount of cores you have.
 # 4 threads is a good number for most internet connections.
 # You may need to adjust this value if you have a particularly slow connection.
-yes | repo sync -c -f --force-sync --no-tag --no-clone-bundle -j$(nproc --all) --optimized-fetch --prune
+yes | repo sync -c -f --force-sync --no-tag --no-clone-bundle -j2500 --optimized-fetch --prune
 
 # Go to the root of the source tree...
 # ...and run the build commands.
@@ -40,7 +37,7 @@ if [ DEVICE = "hlte" ]
   then
     wget https://gist.githubusercontent.com/Jprimero15/01acbaa4c4070c191b76780a49672e2f/raw/4859e5d1b0a177f499474b9cad763fb9843f0c8b/local_manifest.xml
     mv local_manifest.xml .repo/local_manifest.xml
-    yes | repo sync -c -f --force-sync --no-tag --no-clone-bundle -j$(nproc --all) --optimized-fetch --prune
+    yes | repo sync -c -f --force-sync --no-tag --no-clone-bundle -j2500 --optimized-fetch --prune
     lunch revengeos_$DEVICE-$MODE
     lunch revengeos_$DEVICE-$MODE
 fi

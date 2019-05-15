@@ -1,5 +1,5 @@
-REGION=eu-west-1
-NAME=batch-android-build
+REGION=us-west-2
+NAME=batch-android-build-oregon
 CONTAINER_WORK_DIR=/workspace
 KMS=arn:aws:kms:eu-west-1:438591499564:key/025471da-37d7-4127-aae7-02cf06f69cf4
 
@@ -14,7 +14,7 @@ ts := $(shell /bin/date "+%Y-%m-%d-%H-%M-%S")
 		--region $(REGION) --capabilities CAPABILITY_NAMED_IAM \
 		--enable-termination-protection --output text \
 		--parameters $(PARAMETERS) && \
-	aws cloudformation wait stack-create-complete --stack-name $(NAME)-vpc
+	aws cloudformation wait stack-create-complete --stack-name $(STACK_NAME) --region $(REGION)
 
 .change:
 	@echo "Stack exists, update it."
