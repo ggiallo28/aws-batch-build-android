@@ -63,7 +63,7 @@ provider:
     BUCKET: 'batch-android-build-ggiallo28'
     URL_PREFIX: 'https://s3-eu-west-1.amazonaws.com'
     MODE: '{"userdebug": "userdebug", "user": "user"}'
-    DEVICES: '{"potter": "potter"}'
+    DEVICES: '{"potter": "potter", "hlte" : "hlte"}'
 
 # you can add packaging information here
 #package:

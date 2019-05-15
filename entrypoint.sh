@@ -36,6 +36,14 @@ if [ DEVICE = "potter" ]
     lunch revengeos_$DEVICE-$MODE
 fi
 
+if [ DEVICE = "hlte" ]
+  then
+    wget https://gist.githubusercontent.com/Jprimero15/01acbaa4c4070c191b76780a49672e2f/raw/4859e5d1b0a177f499474b9cad763fb9843f0c8b/local_manifest.xml
+    mv local_manifest.xml .repo/local_manifest.xml
+    yes | repo sync -c -f --force-sync --no-tag --no-clone-bundle -j$(nproc --all) --optimized-fetch --prune
+    lunch revengeos_$DEVICE-$MODE
+fi
+
 make -j$(nproc --all) bacon
 
 tar -zcvf rom.tar.gz $OUT_DIR
