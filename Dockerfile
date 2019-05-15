@@ -28,7 +28,7 @@ RUN chmod a+x repo && install repo /usr/local/bin && rm -rf repo
 ENV PATH=~/bin:$PATH
 ENV USE_CCACHE=1
 ENV USE_PREBUILT_CACHE=1
-ENV PREBUILT_CACHE_DIR=~/.ccache
+ENV PREBUILT_CACHE_DIR=/workspace/.ccache
 RUN ccache -M 100G
 
 COPY entrypoint.sh entrypoint.sh
