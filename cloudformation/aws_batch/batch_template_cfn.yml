@@ -38,7 +38,7 @@ Resources:
         #ImageId: ami-00921cd1ce43d567a # ami-0a6a36557ea3b9859
         InstanceRole: !Ref InstanceProfile
         InstanceTypes:
-          - c5.xlarge
+          - m5a.2xlarge
         LaunchTemplate:
           LaunchTemplateId: !Ref ComputeLaunchTemplate
           Version: !GetAtt ComputeLaunchTemplate.LatestVersionNumber
@@ -104,10 +104,10 @@ Resources:
       ContainerProperties:
         Command :
           - "./../entrypoint.sh"
-        Memory: 7500
+        Memory: 30000
         Privileged: false
         ReadonlyRootFilesystem: false
-        Vcpus: 4
+        Vcpus: 8
         Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ImageName}:${ImageTag}"
         MountPoints:
           - ContainerPath: "/workspace"
