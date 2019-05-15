@@ -42,8 +42,10 @@ if [ DEVICE = "hlte" ]
     mv local_manifest.xml .repo/local_manifest.xml
     yes | repo sync -c -f --force-sync --no-tag --no-clone-bundle -j$(nproc --all) --optimized-fetch --prune
     lunch revengeos_$DEVICE-$MODE
+    lunch revengeos_$DEVICE-$MODE
 fi
 
+generate_vendor_hidl_makefiles
 make -j$(nproc --all) bacon
 
 tar -zcvf rom.tar.gz $OUT_DIR

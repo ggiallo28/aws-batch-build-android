@@ -34,11 +34,11 @@ Resources:
           - Fn::ImportValue: !Sub "${VpcStackName}:SubnetB"
         Type: EC2
         MinvCpus: 0
-        MaxvCpus: 8
+        MaxvCpus: 4
         #ImageId: ami-00921cd1ce43d567a # ami-0a6a36557ea3b9859
         InstanceRole: !Ref InstanceProfile
         InstanceTypes:
-          - m5a.2xlarge
+          - m5a.large
         LaunchTemplate:
           LaunchTemplateId: !Ref ComputeLaunchTemplate
           Version: !GetAtt ComputeLaunchTemplate.LatestVersionNumber
@@ -104,10 +104,10 @@ Resources:
       ContainerProperties:
         Command :
           - "./../entrypoint.sh"
-        Memory: 30000
+        Memory: 7500
         Privileged: false
         ReadonlyRootFilesystem: false
-        Vcpus: 8
+        Vcpus: 2
         Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ImageName}:${ImageTag}"
         MountPoints:
           - ContainerPath: "/workspace"
