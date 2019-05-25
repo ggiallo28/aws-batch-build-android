@@ -26,8 +26,15 @@ yes | repo sync -c -f --force-sync --no-tag --no-clone-bundle -j2500 --optimized
 # Go to the root of the source tree...
 # ...and run the build commands.
 . build/envsetup.sh
+echo "Start with $DEVICE $MODE."
 
 if [ DEVICE = "potter" ]
+  then
+    lunch revengeos_$DEVICE-$MODE
+    lunch revengeos_$DEVICE-$MODE
+fi
+
+if [ DEVICE = "x2" ]
   then
     lunch revengeos_$DEVICE-$MODE
     lunch revengeos_$DEVICE-$MODE

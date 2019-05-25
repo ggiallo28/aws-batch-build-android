@@ -30,8 +30,8 @@ provider:
 
 # you can overwrite defaults here
   stage: prd
-  deploymentBucket: batch-android-build-ggiallo28
-  region: eu-west-1
+  deploymentBucket: batch-android-build-oregon-ggiallo28
+  region: us-west-2
 
 # you can add statements to the Lambda function's IAM Role here
   iamRoleStatements:
@@ -58,12 +58,12 @@ provider:
 
 # you can define service wide environment variables here
   environment:
-    JOB_QUEUE: 'batch-android-build-job-queue'
-    JOB_DEFINITION: 'batch-android-build-job-definition'
-    BUCKET: 'batch-android-build-ggiallo28'
+    JOB_QUEUE: 'batch-android-build-oregon-job-queue'
+    JOB_DEFINITION: 'batch-android-build-oregon-job-definition'
+    BUCKET: 'batch-android-build-oregon-ggiallo28'
     URL_PREFIX: 'https://s3-eu-west-1.amazonaws.com'
     MODE: '{"userdebug": "userdebug", "user": "user"}'
-    DEVICES: '{"potter": "potter", "hlte" : "hlte"}'
+    DEVICES: '{"potter": "potter", "hlte" : "hlte", "x2":"x2"}'
 
 # you can add packaging information here
 #package:
