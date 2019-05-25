@@ -2,8 +2,11 @@
 
 
 DEVICE=$2
-MODE=$1
-BUCKET=$3
+MODE=$3
+BUCKET=$4
+
+echo "Start with $DEVICE $MODE."
+echo "Result in Bucker $BUCKET."
 
 adb kill-server
 killall adb
@@ -26,7 +29,6 @@ yes | repo sync -c -f --force-sync --no-tag --no-clone-bundle -j2500 --optimized
 # Go to the root of the source tree...
 # ...and run the build commands.
 . build/envsetup.sh
-echo "Start with $DEVICE $MODE."
 
 if [ DEVICE = "potter" ]
   then

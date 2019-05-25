@@ -68,7 +68,7 @@ def hello(event, context):
             jobDefinition=JOB_DEFINITION,
             containerOverrides={
                 'command': [
-                    './../entrypoint.sh '+device_code_name+' '+mode+' '+BUCKET,
+                    './../entrypoint.sh', device_code_name, mode, BUCKET
                 ]
             },
             timeout={
