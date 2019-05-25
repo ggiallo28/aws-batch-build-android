@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 
-DEVICE=$2
-MODE=$3
-BUCKET=$4
+DEVICE=$1
+MODE=$2
+BUCKET=$3
 
 echo "Start with $DEVICE $MODE."
 echo "Result in Bucker $BUCKET."
