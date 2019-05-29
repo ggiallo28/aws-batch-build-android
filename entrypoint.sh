@@ -31,21 +31,21 @@ yes | repo sync -c -f --force-sync --no-tag --no-clone-bundle -j2500 --optimized
 # ...and run the build commands.
 . build/envsetup.sh
 
-if [ DEVICE = "potter" ]
+if [ DEVICE == "potter" ]
   then
     echo "POTTER"
     lunch revengeos_$DEVICE-$MODE
     lunch revengeos_$DEVICE-$MODE
 fi
 
-if [ DEVICE = "x2" ]
+if [ DEVICE == "x2" ]
   then
     echo "X2"
     lunch revengeos_$DEVICE-$MODE
     lunch revengeos_$DEVICE-$MODE
 fi
 
-if [ DEVICE = "hlte" ]
+if [ DEVICE == "hlte" ]
   then
     echo "HLTE"
     wget https://gist.githubusercontent.com/Jprimero15/01acbaa4c4070c191b76780a49672e2f/raw/4859e5d1b0a177f499474b9cad763fb9843f0c8b/local_manifest.xml
