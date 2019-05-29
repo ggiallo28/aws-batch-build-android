@@ -12,7 +12,8 @@ adb kill-server
 killall adb
 git config --global user.name "AWS"
 git config --global user.email "jeff@bezos.money"
-git config --global url.https://source.codeaurora.org.insteadOf git://codeaurora.org
+git config --global url.ssh://git@privgit.codeaurora.org.insteadOf ssh://git@git.codeaurora.org
+#git config --global url.https://source.codeaurora.org.insteadOf git://codeaurora.org
 
 # Script to setup an android build environment on Arch Linux and derivative distributions
 # Install Repo in the created directory
@@ -32,18 +33,21 @@ yes | repo sync -c -f --force-sync --no-tag --no-clone-bundle -j2500 --optimized
 
 if [ DEVICE = "potter" ]
   then
+    echo "POTTER"
     lunch revengeos_$DEVICE-$MODE
     lunch revengeos_$DEVICE-$MODE
 fi
 
 if [ DEVICE = "x2" ]
   then
+    echo "X2"
     lunch revengeos_$DEVICE-$MODE
     lunch revengeos_$DEVICE-$MODE
 fi
 
 if [ DEVICE = "hlte" ]
   then
+    echo "HLTE"
     wget https://gist.githubusercontent.com/Jprimero15/01acbaa4c4070c191b76780a49672e2f/raw/4859e5d1b0a177f499474b9cad763fb9843f0c8b/local_manifest.xml
     mv local_manifest.xml .repo/local_manifest.xml
     yes | repo sync -c -f --force-sync --no-tag --no-clone-bundle -j2500 --optimized-fetch --prune
