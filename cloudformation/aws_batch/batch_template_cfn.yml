@@ -56,7 +56,13 @@ Resources:
             Ebs:
               DeleteOnTermination: true
               Encrypted: false
-              VolumeSize: 500
+              VolumeSize: 250
+              VolumeType: "gp2"
+          - DeviceName:  '/dev/sdc'  # Amazon ECS-Optimized Amazon Linux 2 ami accepts EDS vol /dev/sd[b-l]
+            Ebs:
+              DeleteOnTermination: true
+              Encrypted: false
+              VolumeSize: 250
               VolumeType: "gp2"
         UserData:
          "Fn::Base64": !Sub |
@@ -68,23 +74,27 @@ Resources:
 
             #!/bin/bash
 
-            mkfs -t xfs -f /dev/sdb
+            mdadm --create --verbose /dev/md0 --level=0 --name=revengeos --raid-devices=2 /dev/sdb /dev/sdc
+            mdadm --detail /dev/md0
+            mkfs.ext4 -L revengeos /dev/md0
+            mdadm --detail --scan | sudo tee -a /etc/mdadm.conf
+            dracut -H -f /boot/initramfs-$(uname -r).img $(uname -r)
             mkdir /data
-            mount /dev/sdb /data
+            mount LABEL=revengeos /mnt/raid
 
-            #mkfs.ext4  /dev/sdb
-            #(
-            #echo n # Add a new partition
-            #echo p # Primary partition
-            #echo 1 # Partition number
-            #echo   # First sector (Accept default: 1)
-            #echo   # Last sector (Accept default: varies)
-            #echo w # Write changes
-            #) | fdisk  /dev/sdb
-            #mkfs.ext4  /dev/xvdb1
+            #mkfs -t xfs -f /dev/sdb
             #mkdir /data
-            #echo " /dev/xvdb1       /data  ext4    defaults        0       2" >> /etc/fstab
-            #mount -a
+            #mount /dev/sdb /data
+
+            blockdev --setra 4294967295 /dev/sdb
+            echo 100 > /proc/sys/vm/dirty_ratio
+            echo "2000" > /proc/sys/vm/vfs_cache_pressure
+
+            #yum install jansson-devel
+            #yum install git
+            #git clone https://github.com/pkoutoupis/rapiddisk.git
+            #yum group install "Development Tools"
+
             service docker restart
 
             yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
