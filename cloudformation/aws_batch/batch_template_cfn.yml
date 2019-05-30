@@ -80,7 +80,7 @@ Resources:
             mdadm --detail --scan | sudo tee -a /etc/mdadm.conf
             dracut -H -f /boot/initramfs-$(uname -r).img $(uname -r)
             mkdir /data
-            mount LABEL=revengeos /mnt/raid
+            mount LABEL=revengeos /data
 
             #mkfs -t xfs -f /dev/sdb
             #mkdir /data
