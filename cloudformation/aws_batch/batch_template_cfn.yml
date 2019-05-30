@@ -74,6 +74,7 @@ Resources:
 
             #!/bin/bash
 
+            yum install -y mdadm
             mdadm --create --verbose /dev/md0 --level=0 --name=revengeos --raid-devices=2 /dev/sdb /dev/sdc
             mdadm --detail /dev/md0
             mkfs.ext4 -L revengeos /dev/md0
