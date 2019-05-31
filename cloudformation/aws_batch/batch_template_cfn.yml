@@ -78,7 +78,7 @@ Resources:
             mdadm --create --verbose /dev/md0 --level=0 --name=revengeos --raid-devices=2 /dev/sdb /dev/sdc
             mdadm --detail /dev/md0
             mkfs.ext4 -L revengeos /dev/md0
-            mdadm --detail --scan | sudo tee -a /etc/mdadm.conf
+            mdadm --detail --scan | tee -a /etc/mdadm.conf
             dracut -H -f /boot/initramfs-$(uname -r).img $(uname -r)
             mkdir /data
             mount LABEL=revengeos /data
