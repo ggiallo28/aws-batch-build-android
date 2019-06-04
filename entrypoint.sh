@@ -55,7 +55,7 @@ if [ DEVICE == "hlte" ]
     lunch revengeos_$DEVICE-$MODE
 fi
 
-generate_vendor_hidl_makefiles
+$ANDROID_BUILD_TOP/device/qcom/common/vendor_hal_makefile_generator.sh
 make -j$(nproc --all) bacon
 
 tar -zcvf rom.tar.gz $OUT_DIR
