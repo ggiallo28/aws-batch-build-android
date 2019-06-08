@@ -25,7 +25,7 @@ yes | repo init --depth 1 -u https://github.com/RevengeOS/android_manifest -b r9
 # Tthe x on jx it's the amount of cores you have.
 # 4 threads is a good number for most internet connections.
 # You may need to adjust this value if you have a particularly slow connection.
-yes | repo sync -c -f --force-sync --no-tag --no-clone-bundle -j2500 --optimized-fetch --prune
+yes | repo sync -c -f --force-sync --no-tag --no-clone-bundle -j100 --optimized-fetch --prune
 
 # Go to the root of the source tree...
 # ...and run the build commands.

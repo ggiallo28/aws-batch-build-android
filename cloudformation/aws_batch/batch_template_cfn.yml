@@ -56,14 +56,14 @@ Resources:
             Ebs:
               DeleteOnTermination: true
               Encrypted: false
-              VolumeSize: 250
+              VolumeSize: 500
               VolumeType: "gp2"
-          - DeviceName:  '/dev/sdc'  # Amazon ECS-Optimized Amazon Linux 2 ami accepts EDS vol /dev/sd[b-l]
-            Ebs:
-              DeleteOnTermination: true
-              Encrypted: false
-              VolumeSize: 250
-              VolumeType: "gp2"
+          #- DeviceName:  '/dev/sdc'  # Amazon ECS-Optimized Amazon Linux 2 ami accepts EDS vol /dev/sd[b-l]
+          #  Ebs:
+          #    DeleteOnTermination: true
+          #    Encrypted: false
+          #    VolumeSize: 250
+          #    VolumeType: "gp2"
         UserData:
          "Fn::Base64": !Sub |
             MIME-Version: 1.0
@@ -74,18 +74,18 @@ Resources:
 
             #!/bin/bash
 
-            yum install -y mdadm
-            mdadm --create --verbose /dev/md0 --level=0 --name=revengeos --raid-devices=2 /dev/sdb /dev/sdc
-            mdadm --detail /dev/md0
-            mkfs.ext4 -L revengeos /dev/md0
-            mdadm --detail --scan | tee -a /etc/mdadm.conf
-            dracut -H -f /boot/initramfs-$(uname -r).img $(uname -r)
-            mkdir /data
-            mount LABEL=revengeos /data
-
-            #mkfs -t xfs -f /dev/sdb
+            #yum install -y mdadm
+            #mdadm --create --verbose /dev/md0 --level=0 --name=revengeos --raid-devices=2 /dev/sdb /dev/sdc
+            #mdadm --detail /dev/md0
+            #mkfs.ext4 -L revengeos /dev/md0
+            #mdadm --detail --scan | tee -a /etc/mdadm.conf
+            #dracut -H -f /boot/initramfs-$(uname -r).img $(uname -r)
             #mkdir /data
-            #mount /dev/sdb /data
+            #mount LABEL=revengeos /data
+
+            mkfs -t xfs -f /dev/sdb
+            mkdir /data
+            mount /dev/sdb /data
 
             blockdev --setra 4294967295 /dev/sdb
             echo 100 > /proc/sys/vm/dirty_ratio
