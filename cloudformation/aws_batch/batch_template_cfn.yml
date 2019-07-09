@@ -38,7 +38,7 @@ Resources:
         #ImageId: ami-00921cd1ce43d567a # ami-0a6a36557ea3b9859
         InstanceRole: !Ref InstanceProfile
         InstanceTypes:
-          - m5a.xlarge
+          - c5d.2xlarge
         LaunchTemplate:
           LaunchTemplateId: !Ref ComputeLaunchTemplate
           Version: !GetAtt ComputeLaunchTemplate.LatestVersionNumber
@@ -102,6 +102,10 @@ Resources:
             status amazon-ssm-agent
             start amazon-ssm-agent
             status amazon-ssm-agent
+
+            curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+            python get-pip.py
+            pip install awscli
 
             --==MYBOUNDARY==
 
