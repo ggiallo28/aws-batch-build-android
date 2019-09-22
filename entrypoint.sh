@@ -8,8 +8,8 @@ BUCKET=$3
 echo "Start with $DEVICE $MODE."
 echo "Result in Bucker $BUCKET."
 
-adb kill-server
-killall adb
+#adb kill-server
+#killall adb
 git config --global user.name "AWS"
 git config --global user.email "jeff@bezos.money"
 git config --global url.ssh://git@privgit.codeaurora.org.insteadOf ssh://git@git.codeaurora.org
