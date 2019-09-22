@@ -54,6 +54,13 @@ if [ DEVICE == "hlte" ]
     lunch revengeos_$DEVICE-$MODE
 fi
 
+if [ DEVICE == "tissot" ]
+  then
+    echo "TISSOT"
+    lunch revengeos_$DEVICE-$MODE
+    lunch revengeos_$DEVICE-$MODE
+fi
+
 . $ANDROID_BUILD_TOP/device/qcom/common/vendor_hal_makefile_generator.sh
 
 make -j$(nproc --all) bacon
