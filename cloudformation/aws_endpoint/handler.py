@@ -66,12 +66,12 @@ def check_running_jobs(device_code_name, force_build, ALL=False):
 def get_logs(event):
     jobid = event['queryStringParameters']['JobId']
     logid = batch.describe_jobs(jobs=[jobid])
-    try:
-        logid = logid['jobs'][0]['attempts'][-1]['container']['logStreamName']
-    except:
-        logid = logid['jobs'][0]['container']['logStreamName']
         
     try:
+        try:
+            logid = logid['jobs'][0]['attempts'][-1]['container']['logStreamName']
+        except:
+            logid = logid['jobs'][0]['container']['logStreamName']
         response = logs.get_log_events(
             logGroupName=LOG_GROUP_NAME,
             logStreamName=logid,

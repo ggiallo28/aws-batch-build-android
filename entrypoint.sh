@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -e
 
 DEVICE=$1
 MODE=$2
@@ -29,6 +28,7 @@ yes | repo sync -c -f --force-sync --no-tag --no-clone-bundle -j100 --optimized-
 
 # Go to the root of the source tree...
 # ...and run the build commands.
+echo "run envsetup.sh"
 . /workspace/build/envsetup.sh
 
 if [ DEVICE == "potter" ]
