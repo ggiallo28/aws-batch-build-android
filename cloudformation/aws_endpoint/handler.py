@@ -64,8 +64,40 @@ def check_running_jobs(device_code_name, force_build, ALL=False):
         list_jobs = []
     return list_jobs
 
+def get_logs(event):
+    jobid = event['queryStringParameters']['JobId']
+    list_jobs = check_running_jobs("", False, ALL=True)
+    message = "Job List:\n "
+    for job in list_jobs:
+        message += "jobId: " + job['jobId'] + " " 
+        message += "jobName: " + job['jobName'] + " "
+        message += "createdAt: " + str(job['createdAt']) + " "
+        message += "status: " + job['status'] + "\n"
+    
+    try:
+        response = logs.get_log_events(
+            logGroupName=LOG_GROUP_NAME,
+            logStreamName=LOG_STREAM_PREFIX+jobid,
+            startFromHead=False
+        )
+        message = ""
+        for e in response['events']:
+            message += str(e["timestamp"]) + ": " + e["message"] + "\n"
+        
+        return {
+            "statusCode": 200,
+            "body": message
+        }
+    except:
+        return {
+            "statusCode": 404,
+            "body": message
+        }
+
+
 def hello(event, context):
     if 'JobId' in event['queryStringParameters']: # Se è specificato il JobId preleva i log
+
         jobid = event['queryStringParameters']['JobId']
         list_jobs = check_running_jobs("", False, ALL=True)
         message = "Job List:\n "
@@ -73,7 +105,7 @@ def hello(event, context):
             message += "jobId: " + job['jobId'] + " " 
             message += "jobName: " + job['jobName'] + " "
             message += "createdAt: " + str(job['createdAt']) + " "
-            message += "status: " + job['status'] + "\n"
+            message += "status: " + job['status'] + "\n "
         
         try:
             response = logs.get_log_events(
