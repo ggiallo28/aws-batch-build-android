@@ -8,7 +8,6 @@ BUCKET=os.environ['BUCKET']
 JOB_QUEUE = os.environ['JOB_QUEUE']
 JOB_DEFINITION = os.environ['JOB_DEFINITION']
 LOG_GROUP_NAME = os.environ['LOG_GROUP_NAME']
-LOG_STREAM_PREFIX = os.environ['LOG_STREAM_PREFIX']
 
 is_device = json.loads(os.environ['DEVICES'])
 is_mode = json.loads(os.environ['MODE'])
@@ -66,21 +65,20 @@ def check_running_jobs(device_code_name, force_build, ALL=False):
 
 def get_logs(event):
     jobid = event['queryStringParameters']['JobId']
-    list_jobs = check_running_jobs("", False, ALL=True)
-    message = "Job List:\n "
-    for job in list_jobs:
-        message += "jobId: " + job['jobId'] + " " 
-        message += "jobName: " + job['jobName'] + " "
-        message += "createdAt: " + str(job['createdAt']) + " "
-        message += "status: " + job['status'] + "\n"
-    
+    logid = batch.describe_jobs(jobs=[jobid])
+    try:
+        logid = logid['jobs'][0]['attempts'][-1]['container']['logStreamName']
+    except:
+        logid = logid['jobs'][0]['container']['logStreamName']
+        
     try:
         response = logs.get_log_events(
             logGroupName=LOG_GROUP_NAME,
-            logStreamName=LOG_STREAM_PREFIX+jobid,
+            logStreamName=logid,
             startFromHead=False
         )
         message = ""
+        print(message)
         for e in response['events']:
             message += str(e["timestamp"]) + ": " + e["message"] + "\n"
         
@@ -89,6 +87,13 @@ def get_logs(event):
             "body": message
         }
     except:
+        list_jobs = check_running_jobs("", False, ALL=True)
+        message = "Job List:\n "
+        for job in list_jobs:
+            message += "jobId: " + job['jobId'] + " " 
+            message += "jobName: " + job['jobName'] + " "
+            message += "createdAt: " + str(job['createdAt']) + " "
+            message += "status: " + job['status'] + "\n"
         return {
             "statusCode": 404,
             "body": message
@@ -97,36 +102,7 @@ def get_logs(event):
 
 def hello(event, context):
     if 'JobId' in event['queryStringParameters']: # Se è specificato il JobId preleva i log
-
-        jobid = event['queryStringParameters']['JobId']
-        list_jobs = check_running_jobs("", False, ALL=True)
-        message = "Job List:\n "
-        for job in list_jobs:
-            message += "jobId: " + job['jobId'] + " " 
-            message += "jobName: " + job['jobName'] + " "
-            message += "createdAt: " + str(job['createdAt']) + " "
-            message += "status: " + job['status'] + "\n "
-        
-        try:
-            response = logs.get_log_events(
-                logGroupName=LOG_GROUP_NAME,
-                logStreamName=LOG_STREAM_PREFIX+jobid,
-                startFromHead=False
-            )
-            message = ""
-            for e in response['events']:
-                message += str(e["timestamp"]) + ": " + e["message"] + "\n"
-            
-            return {
-                "statusCode": 200,
-                "body": message
-            }
-        except:
-            return {
-                "statusCode": 404,
-                "body": message
-            }
-            
+        return get_logs(event)     
     else: # Se NON è specificato il JobId esegui in Job
         status, device_code_name, force_build, mode = check_input_parameters(event, context)
         if status["statusCode"] != 200:
@@ -159,11 +135,10 @@ def hello(event, context):
                 response = batch.terminate_job(jobId=job['jobId'],reason='Duplicate Job, Lambda Termination')
             jobId = list_jobs[-1]['jobId']
 
-
+        message = "Your build will be available soon\n"
+        message += "Link: {}/{}/{}/job={}/rom.tar.gz\n".format(os.environ['URL_PREFIX'],BUCKET,device_code_name,jobId)
+        message += "Logs: {}://{}{}?JobId={}".format(event["headers"]["X-Forwarded-Proto"], event["headers"]["Host"], event["requestContext"]["path"],jobId) 
         return {
             "statusCode": 200,
-            "body": json.dumps({
-                "message": "Your build will be available soon!",
-                "input": "{}/{}/{}/job={}/rom.tar.gz".format(os.environ['URL_PREFIX'],BUCKET,device_code_name,jobId)
-            })
+            "body": message
         }
