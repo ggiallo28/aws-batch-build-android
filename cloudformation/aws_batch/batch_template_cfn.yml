@@ -122,7 +122,7 @@ Resources:
         Memory: 15000
         Privileged: false
         ReadonlyRootFilesystem: false
-        Vcpus: 4
+        Vcpus: 8
         Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ImageName}:${ImageTag}"
         MountPoints:
           - ContainerPath: "/workspace"
