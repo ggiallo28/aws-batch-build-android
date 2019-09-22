@@ -44,6 +44,8 @@ provider:
         - "batch:ListJobs"
         - "batch:DescribeComputeEnvironments"
         - "batch:TerminateJob"
+        - "cloudwatch:*"
+        - "logs:*"
       Resource: "*"
 #      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
 #    - Effect: "Allow"
@@ -64,6 +66,8 @@ provider:
     URL_PREFIX: 'https://s3-eu-west-1.amazonaws.com'
     MODE: '{"userdebug": "userdebug", "user": "user"}'
     DEVICES: '{"potter": "potter", "hlte" : "hlte", "x2":"x2", "tissot":"tissot"}'
+    LOG_GROUP_NAME: '/aws/batch/job'
+    LOG_STREAM_PREFIX: 'batch-android-build-oregon-job-definition/default/'
 
 # you can add packaging information here
 #package:
