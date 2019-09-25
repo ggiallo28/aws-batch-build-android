@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -x
 
 DEVICE=$1
 MODE=$2
