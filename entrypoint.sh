@@ -35,6 +35,7 @@ git config --global url.ssh://git@privgit.codeaurora.org.insteadOf ssh://git@git
 # Script to setup an android build environment on Arch Linux and derivative distributions
 # Install Repo in the created directory
 # Use a real name/email combination, if you intend to submit patches
+cd /workspace
 yes | repo init --depth 1 -u https://github.com/RevengeOS/android_manifest -b r9.0-caf
 
 # Let Repo take care of all the hard work
