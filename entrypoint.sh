@@ -11,7 +11,7 @@ echo "Result in Bucker $BUCKET."
 pip3 install --upgrade awscli
 
 . /setup/setup.sh
-. /setup/ccache.sh
+#. /setup/ccache.sh
 . /setup/ninja.sh
 
 # Install Repo, a Google's tool for working with Git in the context of Android.
@@ -20,10 +20,10 @@ chmod a+x repo && install repo /usr/local/bin && rm -rf repo
 
 ## Configuring Ccache (Speedsup Build process)
 export PATH=~/bin:$PATH
-export USE_CCACHE=1
-export USE_PREBUILT_CACHE=1
-export PREBUILT_CACHE_DIR=/workspace/.ccache
-export ccache -M 100G
+#export USE_CCACHE=1
+#export USE_PREBUILT_CACHE=1
+#export PREBUILT_CACHE_DIR=/workspace/.ccache
+#export ccache -M 100G
 
 #adb kill-server
 #killall adb
