@@ -8,14 +8,8 @@ BUCKET=$3
 echo "Start with $DEVICE $MODE."
 echo "Result in Bucker $BUCKET."
 
-pip3 install --upgrade awscli
-
-## Configuring Ccache (Speedsup Build process)
-export PATH=~/bin:$PATH
-#export USE_CCACHE=1
-#export USE_PREBUILT_CACHE=1
-#export PREBUILT_CACHE_DIR=/workspace/.ccache
-#export ccache -M 100G
+cd /
+. /setup/android_build_env.sh
 
 git config --global user.name "AWS"
 git config --global user.email "jeff@bezos.money"
