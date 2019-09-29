@@ -17,7 +17,7 @@ RUN apt-get update && \
 apt-get install -y git-core ccache && \
 bash ./setup/android_build_env.sh && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get -y install python3-pip
+RUN apt update && apt -y install python3-pip
 RUN pip3 install --upgrade awscli
 
 COPY entrypoint.sh entrypoint.sh
