@@ -8,6 +8,7 @@ ENV PATH ~/bin:$PATH
 ENV USE_CCACHE 1
 ENV USE_PREBUILT_CACHE 1
 ENV PREBUILT_CACHE_DIR /workspace/.ccache
+ENV KERNEL_MAKE_FLAGS
 #export ccache -M 100G
 #+ export ccache -M 100G
 #bash: export: `-M': not a valid identifier
