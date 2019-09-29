@@ -7,6 +7,6 @@ cd /tmp/make-"${1:?}" || exit 1
 ./configure
 curl https://raw.githubusercontent.com/akhilnarang/scripts/master/patches/make-glibc_alloc_fix.patch | patch -p1
 bash ./build.sh
-install ./make /usr/local/bin/make
+sudo install ./make /usr/local/bin/make
 cd - || exit 1
 rm -rf /tmp/make-"${1:?}"{,.tar.gz}
