@@ -8,6 +8,6 @@ then
 echo -e "Please enter a username"
 read -r username
 fi
-sudo useradd "${username}" -m -s /bin/bash
+useradd "${username}" -m -s /bin/bash
 passwd "${username}"
 chage -d 0 "${username}"

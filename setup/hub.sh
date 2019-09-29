@@ -35,7 +35,7 @@ function install_hub {
         aria2c "$(get_release_assets github/hub | grep ${HUB_ARCH})" -o hub.tgz || wget "$(get_release_assets github/hub | grep ${HUB_ARCH})" -O hub.tgz
         mkdir -p hub
         tar -xf hub.tgz -C hub
-        sudo ./hub/*/install --prefix=/usr/local/
+        ./hub/*/install --prefix=/usr/local/
         rm -rf hub/ hub.tgz
     else
         INSTALLED_VERSION="v$(hub --version | tail -n1 | awk '{print $3}')"
@@ -45,7 +45,7 @@ function install_hub {
             wget "$(get_release_assets github/hub | grep ${HUB_ARCH})" -O=hub.tgz
             mkdir -p hub
             tar -xf hub.tgz -C hub
-            sudo ./hub/*/install --prefix=/usr/local/
+            ./hub/*/install --prefix=/usr/local/
             rm -rf hub/ hub.tgz
         else
             echo -e "${CL_YLW}hub ${INSTALLED_VERSION} is already installed!${CL_RST}"

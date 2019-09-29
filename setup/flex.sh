@@ -6,6 +6,6 @@ cd flex || exit 1
 ./autogen.sh
 ./configure
 make -j"$(nproc)"
-sudo make install
+make install
 rm -rf "${PWD}"
 cd - || exit 1
