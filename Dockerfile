@@ -3,7 +3,7 @@ FROM ubuntu:18.04
 COPY setup setup
 
 # Grab Java 8 and build tools:
-ENV LSB_RELEASE Ubuntu\ 18.04.2\ LTS
+#ENV LSB_RELEASE Ubuntu\ 18.04.2\ LTS
 ENV PATH ~/bin:$PATH
 ENV USE_CCACHE 1
 ENV USE_PREBUILT_CACHE 1
@@ -14,7 +14,7 @@ ENV PREBUILT_CACHE_DIR /workspace/.ccache
 #bash: export: `100G': not a valid identifier
 
 RUN apt-get update && \
-apt-get install -y llvm-dev git-core ccache && \
+apt-get install -y lsb-core lsb-release llvm-dev git-core ccache && \
 bash ./setup/android_build_env.sh && rm -rf /var/lib/apt/lists/*
 
 RUN apt update && apt -y install python3-pip
