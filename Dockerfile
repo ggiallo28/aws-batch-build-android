@@ -5,10 +5,10 @@ COPY setup setup
 # Grab Java 8 and build tools:
 ENV LSB_RELEASE Ubuntu\ 18.04.3\ LTS
 ENV USE_CCACHE 1
-ENV CCACHE_MAX_SIZE 35G
+ENV CCACHE_MAX_SIZE 12G
 ENV CCACHE_COMPRESS 1
 ENV LANGUAGE C
-ENV CCACHE_DIR /workspace/ccache
+ENV CCACHE_DIR /ccache
 
 RUN apt-get update && \
 apt-get install -y llvm-dev git-core ccache && \

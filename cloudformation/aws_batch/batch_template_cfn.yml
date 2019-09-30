@@ -19,6 +19,30 @@ Parameters:
   ImageTag:
     Type: String
 
+  InstanceType:
+    Default: m5a.2xlarge
+    Type: String    
+
+  MaxvCpusCount:
+    Default: 8
+    Type: String
+
+  MinvCpusCount:
+    Default: 0
+    Type: String
+
+  MemorySizeMiB:
+    Default: 32000
+    Type: String
+
+  CCacheSizeGB:
+    Default: 22
+    Type: String
+
+  VolumeSizeGB:
+    Default: 500
+    Type: String   
+
 Resources:
   ComputeEnvironment:
     Type: "AWS::Batch::ComputeEnvironment"
@@ -33,16 +57,15 @@ Resources:
           - Fn::ImportValue: !Sub "${VpcStackName}:SubnetA"
           - Fn::ImportValue: !Sub "${VpcStackName}:SubnetB"
         Type: EC2
-        MinvCpus: 0
-        MaxvCpus: 8
-        #ImageId: ami-00921cd1ce43d567a # ami-0a6a36557ea3b9859
+        MinvCpus: !Ref MinvCpusCount
+        MaxvCpus: !Ref MaxvCpusCount
         InstanceRole: !Ref InstanceProfile
         InstanceTypes:
-          - c5.2xlarge
+          - !Ref InstanceType
         LaunchTemplate:
           LaunchTemplateId: !Ref ComputeLaunchTemplate
           Version: !GetAtt ComputeLaunchTemplate.LatestVersionNumber
-        DesiredvCpus: 0
+        DesiredvCpus: !Ref MinvCpusCount
       State: ENABLED
 
   ComputeLaunchTemplate:
@@ -50,20 +73,13 @@ Resources:
     Properties:
       LaunchTemplateName: !Join ["-",[!Ref Project, "launch-template", !Ref ImageTag]]
       LaunchTemplateData:
-        #KeyName: "eu-west-1"
         BlockDeviceMappings:
           - DeviceName:  '/dev/sdb'  # Amazon ECS-Optimized Amazon Linux 2 ami accepts EDS vol /dev/sd[b-l]
             Ebs:
               DeleteOnTermination: true
               Encrypted: false
-              VolumeSize: 500
+              VolumeSize: !Ref VolumeSizeGB
               VolumeType: "gp2"
-          #- DeviceName:  '/dev/sdc'  # Amazon ECS-Optimized Amazon Linux 2 ami accepts EDS vol /dev/sd[b-l]
-          #  Ebs:
-          #    DeleteOnTermination: true
-          #    Encrypted: false
-          #    VolumeSize: 250
-          #    VolumeType: "gp2"
         UserData:
          "Fn::Base64": !Sub |
             MIME-Version: 1.0
@@ -74,15 +90,6 @@ Resources:
 
             #!/bin/bash
 
-            #yum install -y mdadm
-            #mdadm --create --verbose /dev/md0 --level=0 --name=revengeos --raid-devices=2 /dev/sdb /dev/sdc
-            #mdadm --detail /dev/md0
-            #mkfs.ext4 -L revengeos /dev/md0
-            #mdadm --detail --scan | tee -a /etc/mdadm.conf
-            #dracut -H -f /boot/initramfs-$(uname -r).img $(uname -r)
-            #mkdir /data
-            #mount LABEL=revengeos /data
-
             mkfs -t xfs -f /dev/sdb
             mkdir /data
             mount /dev/sdb /data
@@ -90,11 +97,6 @@ Resources:
             blockdev --setra 4294967295 /dev/sdb
             echo 100 > /proc/sys/vm/dirty_ratio
             echo "2000" > /proc/sys/vm/vfs_cache_pressure
-
-            #yum install jansson-devel
-            #yum install git
-            #git clone https://github.com/pkoutoupis/rapiddisk.git
-            #yum group install "Development Tools"
 
             service docker restart
 
@@ -106,6 +108,9 @@ Resources:
             curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
             python get-pip.py
             pip install awscli
+
+            mkdir /ccache
+            mount -t tmpfs -o rw,size=${CCacheSizeGB}G tmpfs /ccache
 
             --==MYBOUNDARY==
 
@@ -119,19 +124,25 @@ Resources:
       ContainerProperties:
         Command :
           - "./../entrypoint.sh"
-        Memory: 15000
+        Memory: !Ref MemorySizeMB
         Privileged: false
         ReadonlyRootFilesystem: false
-        Vcpus: 8
+        Vcpus: !Ref MaxvCpusCount
         Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ImageName}:${ImageTag}"
         MountPoints:
           - ContainerPath: "/workspace"
             ReadOnly: false
             SourceVolume: data
+          - ContainerPath: "/ccache"
+            ReadOnly: false
+            SourceVolume: ccache
         Volumes:
           - Name: data
             Host:
               SourcePath: "/data"
+          - Name: ccache
+            Host:
+              SourcePath: "/ccache"
 
   JobQueue:
     Type: AWS::Batch::JobQueue

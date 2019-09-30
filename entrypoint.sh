@@ -11,6 +11,14 @@ echo "Result in Bucker $BUCKET."
 cd /
 . /setup/android_build_env.sh
 ccache -M $CCACHE_MAX_SIZE
+rm -rf /ccache
+
+aws s3 ls s3://$BUCKET/$DEVICE/cache.tar.gz
+if [[ $? -eq 0 ]]; then
+  aws s3 cp s3://$BUCKET/$DEVICE/cache.tar.gz ./cache.tar.gz
+  tar -xvzf cache.tar.gz /ccache
+fi
+
 
 git config --global user.name "AWS"
 git config --global user.email "jeff@bezos.money"
@@ -69,9 +77,14 @@ fi
 . $ANDROID_BUILD_TOP/device/qcom/common/vendor_hal_makefile_generator.sh
 
 make -j$(nproc --all) bacon
+rm -rf $DEVICE && mkdir $DEVICE || mkdir $DEVICE
+mv /workspace/out/target/product/$DEVICE/*.zip ./$DEVICE
+mv /workspace/out/target/product/$DEVICE/*.md5 ./$DEVICE
 
-tar -zcvf rom.tar.gz $OUT_DIR
+tar -cvzf rom.tar.gz ./$DEVICE/
 aws s3 cp ./rom.tar.gz s3://$BUCKET/$DEVICE/job=$AWS_BATCH_JOB_ID/rom.tar.gz | echo "true"
 
+tar -cvzf cache.tar.gz /ccache
+aws s3 cp ./cache.tar.gz s3://$BUCKET/$DEVICE/cache.tar.gz | echo "true"
 
 # scp -r rom.zip chityanj@storage.osdn.net:/storage/groups/r/re/revengeos/rolex
