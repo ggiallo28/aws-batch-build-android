@@ -14,7 +14,7 @@ ENV PREBUILT_CACHE_DIR /workspace/.ccache
 #bash: export: `100G': not a valid identifier
 
 RUN apt-get update && \
-apt-get install -y git-core ccache && \
+apt-get install -y llvm-dev git-core ccache && \
 bash ./setup/android_build_env.sh && rm -rf /var/lib/apt/lists/*
 
 RUN apt update && apt -y install python3-pip
