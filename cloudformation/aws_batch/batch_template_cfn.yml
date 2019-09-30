@@ -124,7 +124,7 @@ Resources:
       ContainerProperties:
         Command :
           - "./../entrypoint.sh"
-        Memory: !Ref MemorySizeMB
+        Memory: !Ref MemorySizeMiB
         Privileged: false
         ReadonlyRootFilesystem: false
         Vcpus: !Ref MaxvCpusCount
