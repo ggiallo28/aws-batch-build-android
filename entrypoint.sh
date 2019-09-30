@@ -10,6 +10,7 @@ echo "Result in Bucker $BUCKET."
 
 cd /
 . /setup/android_build_env.sh
+ccache -M $CCACHE_MAX_SIZE
 
 git config --global user.name "AWS"
 git config --global user.email "jeff@bezos.money"
