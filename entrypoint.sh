@@ -76,10 +76,10 @@ fi
 . $ANDROID_BUILD_TOP/device/qcom/common/vendor_hal_makefile_generator.sh
 
 make -j$(nproc --all) bacon
+
 rm -rf $DEVICE && mkdir $DEVICE || mkdir $DEVICE
 mv /workspace/out/target/product/$DEVICE/*.zip ./$DEVICE
-mv /workspace/out/target/product/$DEVICE/*.md5 ./$DEVICE
-
+mv /workspace/out/target/product/$DEVICE/*.md5sum ./$DEVICE
 tar -cvzf rom.tar.gz ./$DEVICE/
 aws s3 cp ./rom.tar.gz s3://$BUCKET/$DEVICE/job=$AWS_BATCH_JOB_ID/rom.tar.gz | echo "true"
 
