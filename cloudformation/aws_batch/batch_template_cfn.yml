@@ -20,7 +20,7 @@ Parameters:
     Type: String
 
   InstanceType:
-    Default: m5a.2xlarge
+    Default: c5.2xlarge
     Type: String    
 
   MaxvCpusCount:
@@ -32,11 +32,11 @@ Parameters:
     Type: String
 
   MemorySizeMiB:
-    Default: 32000
+    Default: 15380
     Type: String
 
   CCacheSizeGB:
-    Default: 22
+    Default: 5
     Type: String
 
   VolumeSizeGB:
