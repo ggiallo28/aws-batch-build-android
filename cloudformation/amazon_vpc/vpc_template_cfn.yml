@@ -6,6 +6,40 @@ Parameters:
     Description: "Name of the project"
     Type: String
 
+  CreateSubnetA:
+    Type: String
+    Default: True
+    AllowedValues: 
+      - True
+      - False          
+
+  CreateSubnetB:
+    Type: String
+    Default: True
+    AllowedValues: 
+      - True
+      - False    
+
+  CreateSubnetC:
+    Type: String
+    Default: True
+    AllowedValues: 
+      - True
+      - False  
+
+  CreateSubnetD:
+    Type: String
+    Default: True
+    AllowedValues: 
+      - True
+      - False    
+
+Conditions: 
+  AddSubnetA: !Equals [ !Ref CreateSubnetA, True ]
+  AddSubnetB: !Equals [ !Ref CreateSubnetB, True ]
+  AddSubnetC: !Equals [ !Ref CreateSubnetC, True ]
+  AddSubnetD: !Equals [ !Ref CreateSubnetD, True ]
+
 Resources:
   VPC:
     Type: AWS::EC2::VPC
@@ -33,6 +67,7 @@ Resources:
 
   SubnetA:
     Type: AWS::EC2::Subnet
+    Condition: AddSubnetA
     Properties:
       VpcId: !Ref VPC
       CidrBlock: 172.31.0.0/20
@@ -47,6 +82,7 @@ Resources:
 
   SubnetB:
     Type: AWS::EC2::Subnet
+    Condition: AddSubnetB
     Properties:
       VpcId: !Ref VPC
       CidrBlock: 172.31.16.0/20
@@ -58,6 +94,36 @@ Resources:
       Tags:
         - Key: Name
           Value: !Join ["-",[!Ref Project, "pub-subnetB"]]
+
+  SubnetC:
+    Type: AWS::EC2::Subnet
+    Condition: AddSubnetC
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 172.31.32.0/20
+      MapPublicIpOnLaunch: true
+      AvailabilityZone:
+        Fn::Select:
+          - 2
+          - Fn::GetAZs: ""
+      Tags:
+        - Key: Name
+          Value: !Join ["-",[!Ref Project, "pub-subnetC"]]
+
+  SubnetD:
+    Type: AWS::EC2::Subnet
+    Condition: AddSubnetD
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 172.31.48.0/20
+      MapPublicIpOnLaunch: true
+      AvailabilityZone:
+        Fn::Select:
+          - 3
+          - Fn::GetAZs: ""
+      Tags:
+        - Key: Name
+          Value: !Join ["-",[!Ref Project, "pub-subnetD"]]
 
   RouteTable:
     Type: AWS::EC2::RouteTable
@@ -77,15 +143,31 @@ Resources:
 
   SubnetARouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: AddSubnetA
     Properties:
       RouteTableId: !Ref RouteTable
       SubnetId: !Ref SubnetA
 
   SubnetBRouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: AddSubnetB
     Properties:
       RouteTableId: !Ref RouteTable
       SubnetId: !Ref SubnetB
+
+  SubnetCRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: AddSubnetC
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref SubnetC
+
+  SubnetDRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Condition: AddSubnetD
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref SubnetD
 
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -113,16 +195,32 @@ Outputs:
       Name: !Join [ ":", [ !Ref "AWS::StackName", SecurityGroup ] ]
 
   SubnetA:
+    Condition: AddSubnetA
     Description: SubnetA
     Value: !Ref SubnetA
     Export:
       Name: !Join [ ":", [ !Ref "AWS::StackName", SubnetA ] ]
 
   SubnetB:
+    Condition: AddSubnetB
     Description: SubnetB
     Value: !Ref SubnetB
     Export:
       Name: !Join [ ":", [ !Ref "AWS::StackName", SubnetB ] ]
+
+  SubnetC:
+    Condition: AddSubnetC
+    Description: SubnetC
+    Value: !Ref SubnetC
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", SubnetC ] ]
+
+  SubnetD:
+    Condition: AddSubnetD
+    Description: SubnetD
+    Value: !Ref SubnetD
+    Export:
+      Name: !Join [ ":", [ !Ref "AWS::StackName", SubnetD ] ]
 
   SubnetList:
     Description: SubnetB

@@ -72,7 +72,9 @@ Resources:
           - Fn::ImportValue: !Sub "${VpcStackName}:SecurityGroup"
         Subnets:
           - Fn::ImportValue: !Sub "${VpcStackName}:SubnetA"
-          - Fn::ImportValue: !Sub "${VpcStackName}:SubnetB"
+          - Fn::ImportValue: !Sub "${VpcStackName}:SubnetB" 
+          - Fn::ImportValue: !Sub "${VpcStackName}:SubnetC"
+          - Fn::ImportValue: !Sub "${VpcStackName}:SubnetD"
         MinvCpus: !Ref MinvCpusCount
         MaxvCpus: !Ref MaxvCpusCount
         InstanceRole: !Ref InstanceProfile
@@ -100,6 +102,8 @@ Resources:
         Subnets:
           - Fn::ImportValue: !Sub "${VpcStackName}:SubnetA"
           - Fn::ImportValue: !Sub "${VpcStackName}:SubnetB" 
+          - Fn::ImportValue: !Sub "${VpcStackName}:SubnetC"
+          - Fn::ImportValue: !Sub "${VpcStackName}:SubnetD" 
         MinvCpus: !Ref MinvCpusCount
         MaxvCpus: !Ref MaxvCpusCount
         InstanceRole: !Ref InstanceProfile
