@@ -41,22 +41,65 @@ Parameters:
 
   VolumeSizeGB:
     Default: 500
-    Type: String   
+    Type: String
+
+  EnvType:
+    Default: Spot
+    Type: String  
+    AllowedValues: 
+      - OnDemand
+      - Spot  
+
+  BidPercentage:
+    Default: 55
+    Type: String  
+
+Conditions: 
+  CreateSpotResources: !Equals [ !Ref EnvType, OnDemand ]
+  CreateOndemandResources: !Equals [ !Ref EnvType, Spot ]
 
 Resources:
   ComputeEnvironment:
     Type: "AWS::Batch::ComputeEnvironment"
+    Condition: CreateOndemandResources
     Properties:
       Type: MANAGED
       ComputeEnvironmentName: !Sub "${Project}-${AWS::Region}-${ImageTag}"
       ServiceRole: !Ref ServiceRole
       ComputeResources:
+        Type: EC2
         SecurityGroupIds:
           - Fn::ImportValue: !Sub "${VpcStackName}:SecurityGroup"
         Subnets:
           - Fn::ImportValue: !Sub "${VpcStackName}:SubnetA"
           - Fn::ImportValue: !Sub "${VpcStackName}:SubnetB"
-        Type: EC2
+        MinvCpus: !Ref MinvCpusCount
+        MaxvCpus: !Ref MaxvCpusCount
+        InstanceRole: !Ref InstanceProfile
+        InstanceTypes:
+          - !Ref InstanceType
+        LaunchTemplate:
+          LaunchTemplateId: !Ref ComputeLaunchTemplate
+          Version: !GetAtt ComputeLaunchTemplate.LatestVersionNumber
+        DesiredvCpus: !Ref MinvCpusCount
+      State: ENABLED
+
+  ComputeEnvironmentSpot:
+    Type: "AWS::Batch::ComputeEnvironment"
+    Condition: CreateSpotResources
+    Properties:
+      Type: MANAGED
+      ComputeEnvironmentName: !Sub "${Project}-${AWS::Region}-${ImageTag}-spot"
+      ServiceRole: !Ref ServiceRole
+      ComputeResources:
+        BidPercentage: !Ref BidPercentage
+        SpotIamFleetRole: !Ref ServiceRole
+        Type: SPOT
+        SecurityGroupIds:
+          - Fn::ImportValue: !Sub "${VpcStackName}:SecurityGroup"
+        Subnets:
+          - Fn::ImportValue: !Sub "${VpcStackName}:SubnetA"
+          - Fn::ImportValue: !Sub "${VpcStackName}:SubnetB" 
         MinvCpus: !Ref MinvCpusCount
         MaxvCpus: !Ref MaxvCpusCount
         InstanceRole: !Ref InstanceProfile
@@ -146,6 +189,7 @@ Resources:
 
   JobQueue:
     Type: AWS::Batch::JobQueue
+    Condition: CreateOndemandResources
     Properties:
       ComputeEnvironmentOrder:
         - Order: 1
@@ -153,6 +197,17 @@ Resources:
       State: ENABLED
       Priority: 1
       JobQueueName: !Join ["-",[!Ref Project, "job-queue"]]
+
+  JobQueueSpot:
+    Type: AWS::Batch::JobQueue
+    Condition: CreateSpotResources
+    Properties:
+      ComputeEnvironmentOrder:
+        - Order: 1
+          ComputeEnvironment: !Ref  ComputeEnvironmentSpot
+      State: ENABLED
+      Priority: 1
+      JobQueueName: !Join ["-",[!Ref Project, "job-queue-spot"]]
 
   ServiceRole:
     Type: AWS::IAM::Role
@@ -166,6 +221,7 @@ Resources:
             Principal:
               Service:
                 - "batch.amazonaws.com"
+                - "spotfleet.amazonaws.com"
             Action:
               - "sts:AssumeRole"
       Policies:
@@ -206,6 +262,7 @@ Resources:
                 Resource: !Ref KmsKeyArn
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2SpotFleetRole
 
   InstanceRole:
     Type: AWS::IAM::Role
