@@ -86,4 +86,5 @@ aws s3 cp ./rom.tar.gz s3://$BUCKET/$DEVICE/job=$AWS_BATCH_JOB_ID/rom.tar.gz | e
 tar -cvzf cache.tar.gz /ccache
 aws s3 cp ./cache.tar.gz s3://$BUCKET/$DEVICE/cache.tar.gz | echo "true"
 
+ccache -s
 # scp -r rom.zip chityanj@storage.osdn.net:/storage/groups/r/re/revengeos/rolex
