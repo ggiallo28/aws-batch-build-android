@@ -89,7 +89,7 @@ Resources:
     Condition: CreateSpotResources
     Properties:
       Type: MANAGED
-      ComputeEnvironmentName: !Sub "${Project}-${AWS::Region}-${ImageTag}-spot"
+      ComputeEnvironmentName: !Sub "${Project}-${AWS::Region}-${ImageTag}"
       ServiceRole: !Ref ServiceRole
       ComputeResources:
         BidPercentage: !Ref BidPercentage
@@ -207,7 +207,7 @@ Resources:
           ComputeEnvironment: !Ref  ComputeEnvironmentSpot
       State: ENABLED
       Priority: 1
-      JobQueueName: !Join ["-",[!Ref Project, "job-queue-spot"]]
+      JobQueueName: !Join ["-",[!Ref Project, "job-queue"]]
 
   ServiceRole:
     Type: AWS::IAM::Role
