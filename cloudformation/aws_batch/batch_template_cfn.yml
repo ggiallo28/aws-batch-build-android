@@ -168,6 +168,8 @@ Resources:
       Timeout:
         AttemptDurationSeconds: 1800
       JobDefinitionName: !Join ["-",[!Ref Project, "job-definition"]]
+      RetryStrategy: 
+        Attempts: 3
       ContainerProperties:
         Command :
           - "./../entrypoint.sh"
