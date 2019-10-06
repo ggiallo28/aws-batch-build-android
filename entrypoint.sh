@@ -16,7 +16,8 @@ ccache -M $(df -h /ccache --output=size | sed 1d | xargs)
 aws s3 ls s3://$BUCKET/$DEVICE/cache.tar.gz
 if [[ $? -eq 0 ]]; then
   aws s3 cp s3://$BUCKET/$DEVICE/cache.tar.gz ./cache.tar.gz
-  tar -xvzf cache.tar.gz -C /ccache
+  tar -xvzf cache.tar.gz -C /tmp
+  mv /tmp/ccache/* /ccache
 fi
 
 git config --global user.name "AWS"
