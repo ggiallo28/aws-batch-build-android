@@ -18,6 +18,7 @@ if [[ $? -eq 0 ]]; then
   aws s3 cp s3://$BUCKET/$DEVICE/cache.tar.gz ./cache.tar.gz
   tar -xvzf cache.tar.gz -C /tmp
   mv /tmp/ccache/* /ccache
+  rm -rf /tmp/ccache
 fi
 
 git config --global user.name "AWS"

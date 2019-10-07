@@ -8,6 +8,7 @@ BUCKET=os.environ['BUCKET']
 JOB_QUEUE = os.environ['JOB_QUEUE']
 JOB_DEFINITION = os.environ['JOB_DEFINITION']
 LOG_GROUP_NAME = os.environ['LOG_GROUP_NAME']
+REGION = os.environ['AWS_REGION']
 
 is_device = json.loads(os.environ['DEVICES'])
 is_mode = json.loads(os.environ['MODE'])
@@ -88,7 +89,7 @@ def get_logs(event):
         }
     except:
         list_jobs = check_running_jobs("", False, ALL=True)
-        message = "Job List:\n "
+        message = "Job List:\n"
         for job in list_jobs:
             message += "jobId: " + job['jobId'] + " " 
             message += "jobName: " + job['jobName'] + " "
@@ -136,7 +137,7 @@ def hello(event, context):
             jobId = list_jobs[-1]['jobId']
 
         message = "Your build will be available soon\n"
-        message += "Link: {}/{}/{}/job={}/rom.tar.gz\n".format(os.environ['URL_PREFIX'],BUCKET,device_code_name,jobId)
+        message += "Link: https://{}.s3-{}.amazonaws.com/{}/job={}/rom.tar.gz\n".format(BUCKET, REGION,device_code_name,jobId)
         message += "Logs: {}://{}{}?JobId={}".format(event["headers"]["X-Forwarded-Proto"], event["headers"]["Host"], event["requestContext"]["path"],jobId) 
         return {
             "statusCode": 200,
