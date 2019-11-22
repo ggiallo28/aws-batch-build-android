@@ -159,6 +159,16 @@ Resources:
             mkdir /ccache
             mount -t tmpfs -o rw,size=${CCacheSizeGB}G tmpfs /ccache
 
+            bash <(curl -Ss https://my-netdata.io/kickstart.sh)
+
+            AWS_ROUTE53_ZONEID="ZTZ26VS35XMRM"
+            HOSTNAME="android.freeme.name."
+            TTL="300"
+            IP=`curl http://ifconfig.co/ 2>/dev/null`
+
+            aws route53 change-resource-record-sets --hosted-zone-id $AWS_ROUTE53_ZONEID --change-batch "{ \"Changes\": [ { \"Action\": \"UPSERT\", \"ResourceRecordSet\": { \"Name\": \"$HOSTNAME\", \"Type\": \"A\", \"TTL\": $TTL, \"ResourceRecords\": [ { \"Value\": \"$IP\" } ] } } ] }"
+            echo "Updated the DNS Zone to $IP"
+
             --==MYBOUNDARY==
 
   JobDefinition:
