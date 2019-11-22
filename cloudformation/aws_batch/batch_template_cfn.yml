@@ -67,7 +67,7 @@ Parameters:
     Type: String
 
   BucketName:
-    Default: batch-android-build-oregon-ggiallo28
+    Default: arn:aws:s3:::batch-android-build-oregon-ggiallo28
     Type: String
 
 
